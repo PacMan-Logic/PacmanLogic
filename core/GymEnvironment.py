@@ -26,19 +26,21 @@ class PacmanEnv(gym.Env):
         self._last_operation = []
         self._time = max_time
         self._board = None
-        self._wall = None
         self._score = [0, 0]
 
         self._pacman = pacman
         self._pacmanskill = pacmanskill
 
         self._compete = ghost
+
+        self.start_time = None
+        self.max_time = 180 # 最长限时3分钟，后续可修改
         
         self.observation_space = spaces.MultiDiscrete(
             np.ones((size, size)) * categories
         ) # 这段代码定义了环境的观察空间。在强化学习中，观察空间代表了智能体可以观察到的环境状态的所有可能值
         
-        self.action_space = spaces.Discrete(10000) # TODO(wxt): 修改参数使得能够传入吃豆人+3个幽灵的移动参数
+        self.action_space = spaces.Discrete(1000)
         
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -79,6 +81,7 @@ class PacmanEnv(gym.Env):
         return {"score": self._score}
     
     def reset(self, seed=None, board=None):
+        self.start_time = time.time()
         super().reset(seed=seed)
         self._last_new = [[]]
         self._last_operation = [[-1],[-1,-1,-1]] # 分别代表吃豆人的行动操作（第一个数）和三个幽灵的行动操作（后三个数）
@@ -106,38 +109,57 @@ class PacmanEnv(gym.Env):
         
         return self._board, self._get_info()
     
+    def check_time(self):
+        current_time = time.time()
+        if current_time - self.start_time >= self.max_time:
+            return True  # 游戏结束
+        else:
+            return False
+
     def observation_space(self):
         return self.observation_space
 
     def action_space(self):
         return self.action_space
     
-    def num_to_coord(self, action): #abcd四位数
-        assert action >= 0 and action <= 4444
+    def num_to_coord(self, role, action): 
+        assert role == 0 or role == 1
 
-        d = action % 10
-        c = ( action // 10 ) % 10
-        b = ( action // 100 ) % 10
-        a = ( action // 1000 ) % 10
-
-        assert a >= 0 and a < self.operation_num and b >= 0 and b < self.operation_num and c >= 0 and c < self.operation_num and d >= 0 and d < self.operation_num
-
-        return [a,b,c,d]
+        if role == 0:
+            assert action >= 0 and action < self.operation_num
+            return action
+        if role == 1:
+            c = action % 10
+            b = ( action // 10 ) % 10
+            a = ( action // 100 ) % 10
+            assert a >= 0 and a < self.operation_num and b >= 0 and b < self.operation_num and c >= 0 and c < self.operation_num 
+            return [a,b,c]
     
-    def coord_to_num(self, action):
+    def coord_to_num(self, role, action):
         assert (
-            action[0] >= 0
-            and action[0] < self.operation_num
-            and action[1] >= 0
-            and action[1] < self.operation_num
-            and action[2] >= 0
-            and action[2] < self.operation_num
-            and action[3] >= 0
-            and action[3] < self.operation_num
+            role == 0 or role == 1
         )
-        return action[0] * 1000 + action[1] * 100 + action[2] * 10 + action[3]
+        if role == 0:
+            assert (
+                len(action) == 1
+                and action[0] >= 0
+                and action[0] < self.operation_num
+            )
+            return action[0]
+        if role == 1:
+            assert (
+                len(action) == 3
+                and action[0] >= 0
+                and action[0] < self.operation_num
+                and action[1] >= 0
+                and action[1] < self.operation_num
+                and action[2] >= 0
+                and action[2] < self.operation_num
+            )
+            return action[0] * 100 + action[1] * 10 + action[2]
 
     # TODO(zyc): def step(self, action, pacman=0, ghost=0):
+    # 先判断是否到限制的时间（调用check_time）
     # 判断吃到豆子的情况，修改棋盘状态，判断幽灵和吃豆人的行动是否合法，计算幽灵和吃豆人位置（注意技能）和幽灵和吃豆人相遇情况，计算得分
             
         
