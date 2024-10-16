@@ -40,7 +40,7 @@ class PacmanEnv(gym.Env):
             np.ones((size, size)) * categories
         ) # 这段代码定义了环境的观察空间。在强化学习中，观察空间代表了智能体可以观察到的环境状态的所有可能值
         
-        self.action_space = spaces.Discrete(1000)
+        self.action_space = spaces.MultiDiscrete([5, 5, 5, 5])
         
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -122,41 +122,11 @@ class PacmanEnv(gym.Env):
     def action_space(self):
         return self.action_space
     
-    def num_to_coord(self, role, action): 
-        assert role == 0 or role == 1
-
-        if role == 0:
-            assert action >= 0 and action < self.operation_num
-            return action
-        if role == 1:
-            c = action % 10
-            b = ( action // 10 ) % 10
-            a = ( action // 100 ) % 10
-            assert a >= 0 and a < self.operation_num and b >= 0 and b < self.operation_num and c >= 0 and c < self.operation_num 
-            return [a,b,c]
-    
-    def coord_to_num(self, role, action):
-        assert (
-            role == 0 or role == 1
-        )
-        if role == 0:
-            assert (
-                len(action) == 1
-                and action[0] >= 0
-                and action[0] < self.operation_num
-            )
-            return action[0]
-        if role == 1:
-            assert (
-                len(action) == 3
-                and action[0] >= 0
-                and action[0] < self.operation_num
-                and action[1] >= 0
-                and action[1] < self.operation_num
-                and action[2] >= 0
-                and action[2] < self.operation_num
-            )
-            return action[0] * 100 + action[1] * 10 + action[2]
+    def get_action(self, action): 
+        assert len(action) == 4
+        pacman = [action[0]]
+        ghost = action[1:]
+        return pacman, ghost
 
     # TODO(zyc): def step(self, action, pacman=0, ghost=0):
     # 先判断是否到限制的时间（调用check_time）
