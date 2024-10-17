@@ -5,7 +5,7 @@ def main():
     env = PacmanEnv(render_mode="local")
 
     # 初始化游戏环境并打印初始棋盘
-    initial_state, info = env.reset()
+    env.reset()
     print("Initial game board:")
     env.render()
 
