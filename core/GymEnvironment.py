@@ -38,7 +38,7 @@ class PacmanEnv(gym.Env):
             np.ones((size, size)) * categories
         ) # 这段代码定义了环境的观察空间。在强化学习中，观察空间代表了智能体可以观察到的环境状态的所有可能值
         
-        self.action_space = spaces.Discrete(10000) # TODO(wxt): 修改参数使得能够传入吃豆人+3个幽灵的移动参数
+        self.action_space = spaces.Discrete(10000)
         
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -66,6 +66,7 @@ class PacmanEnv(gym.Env):
                         print("\033[1;48m  \033[0m", end="")
                     elif self._board[i][j] == 8:
                         print("\033[1;49m  \033[0m", end="")
+                print()
         elif self.render_mode == 'logic': # 返回一个字典
             return_dict = {
                 "player": self._player,
@@ -93,7 +94,7 @@ class PacmanEnv(gym.Env):
             )
             # TODO(lxy): 修改墙生成逻辑 + 豆子的生成逻辑（或许需要考虑豆子生成的概率），幽灵起始位置
             k = self.size
-            for i in range(): # 生成墙
+            for i in range(k): # 生成墙
                 self._board[i][0] = 2
                 self._board[0][i] = 2
                 self._board[i][k-1] = 2
