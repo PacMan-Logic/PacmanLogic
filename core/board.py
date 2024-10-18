@@ -40,7 +40,7 @@ def boardgenerator(size):
     # 在地图的边缘添加墙壁，并预留两个出口
     board[0, :] = board[-1, :] = board[:, 0] = board[:, -1] = 0
     exit1, exit2 = random.sample(range(1, size-1), 2)
-    board[0, exit1] = board[-1, exit2] = 1
+    board[0, exit1] = board[-1, exit2] = 8
     
     return board
 

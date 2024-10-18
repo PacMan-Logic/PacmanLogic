@@ -14,7 +14,7 @@ class PacmanEnv(gym.Env):
         render_mode = None,
         size = 20,
         operation_num = 5,
-        categories = 8, # 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed bean 5:magnet bean 6:shield bean 7:*2 bean
+        categories = 9, # 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed bean 5:magnet bean 6:shield bean 7:*2 bean 8:portal
         max_time = 3*60,
         pacman = 0, # 玩家
         pacmanskill = 0,
@@ -67,6 +67,8 @@ class PacmanEnv(gym.Env):
                         print("\033[1;46m  \033[0m", end="") # 护盾豆子：青
                     elif self._board[i][j] == 7:
                         print("\033[1;48m  \033[0m", end="") # *2豆子：灰
+                    elif self._board[i][j] == 8:
+                        print("\033[48;5;27m  \033[0m", end="") # 传送门
                 print()
                 
         elif self.render_mode == 'logic': # 返回一个字典
