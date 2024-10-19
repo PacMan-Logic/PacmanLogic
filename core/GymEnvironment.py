@@ -5,6 +5,8 @@ import gym
 import numpy as np
 from gym import spaces
 from board import boardgenerator
+from pacman import Pacman
+# from ghost import Ghost
 
 class PacmanEnv(gym.Env):
     metadata = {"render_modes": ["local", "logic", "ai"]}
@@ -16,8 +18,10 @@ class PacmanEnv(gym.Env):
         operation_num = 5,
         categories = 9, # 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed bean 5:magnet bean 6:shield bean 7:*2 bean 8:portal
         max_time = 3*60,
-        pacman = 0, # 玩家
-        pacmanskill = 0,
+        pacman=Pacman(),
+        # ghost1 = Ghost(),
+        # ghost2 = Ghost(),
+        # ghost3 = Ghost(),
         ghost = True, 
 	):
         assert size >= 3
@@ -30,12 +34,15 @@ class PacmanEnv(gym.Env):
         self._score = [0, 0]
 
         self._pacman = pacman
-        self._pacmanskill = pacmanskill
 
-        self._compete = ghost
+        self._ghost1 = ghost1
+        self._ghost1 = ghost2
+        self._ghost1 = ghost3
 
         self.start_time = None
         self.max_time = 180 # 最长限时3分钟，后续可修改
+        
+        self._level = 1
         
         self.observation_space = spaces.MultiDiscrete(
             np.ones((size, size)) * categories
@@ -84,16 +91,21 @@ class PacmanEnv(gym.Env):
         return {"score": self._score}
     
     def reset(self, seed=None, board=None):
-        self.start_time = time.time()
-        super().reset(seed=seed)
-        self._last_new = [[]]
-        self._last_operation = [[-1],[-1,-1,-1]] # 分别代表吃豆人的行动操作（第一个数）和三个幽灵的行动操作（后三个数）
-        self._score = [0, 0]
-        self._player = 0
-        
+        if self._level == 1: # 如果刚开始玩游戏,那就全要初始化
+            self.start_time = time.time()
+            super().reset(seed=seed)
+            self._last_new = [[]]
+            self._last_operation = [[-1],[-1,-1,-1]] # 分别代表吃豆人的行动操作（第一个数）和三个幽灵的行动操作（后三个数）
+            self._score = [0, 0]
+            self._player = 0
+            
+                
         if board is not None:
             self._board = board
-            
+        else:
+            self._board = boardgenerator(self.size)
+        
+        
         if self.render_mode == "logic": # 在逻辑渲染模式下，更新游戏状态的表示
             for i in range(self.size):
                 for j in range(self.size):
