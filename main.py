@@ -9,6 +9,8 @@ ERROR_MAP = ["RE", "TLE", "OLE"]
 replay_file = None
 level = 0
 
+# FIXME: 在reset的时候随机幽灵和吃豆人的位置，这个处于创建环境之后、开始游戏之前
+
 def get_ai_info( player , player_type , another_player_type ):
     '''
     获取ai或播放器用户的操作: 玩家1和玩家2的类型: 1 为 AI, 2 为网页播放器。

@@ -42,7 +42,7 @@ class Pacman:
             self.acquire_skill(3)
             board[x][y] = 1
         elif board[x][y] == 7:
-            self.acquire_skill1(0)
+            self.acquire_skill(0)
             board[x][y] = 1
 
     def eat_bean(self, board):
