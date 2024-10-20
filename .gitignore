@@ -1,3 +1,7 @@
 agent_test/*
+agent_test
 PacMan/*
+PacMan
 .DS_Store
+core/__pycache__/*
+core/__pycache__

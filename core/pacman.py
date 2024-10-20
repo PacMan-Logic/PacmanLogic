@@ -1,17 +1,24 @@
-import threading
-import random
+# Note: double_score: 0, speed_up: 1, magnet: 2
+DEFAULT_SKILL_TIME = [10, 10, 10]
+
 
 class Pacman:
-    def __init__(self, id=0, score=0, double_score=False, speed_up=False, magnet=False, shield=False, x = 1, y = 1):
-        self.id = id
+    def __init__(
+        self,
+        id=0,
+        score=0,
+        double_score=0,
+        speed_up=0,
+        magnet=0,  # Note: the remaining rounds of magnet
+        shield=0,  # Note: the number of shield
+        x=-1,
+        y=-1,
+    ):
+        self.id = id  # FIXME: how should it be used?
         self.score = score
-        self.double_score = double_score
-        self.speed_up = speed_up
-        self.magnet = magnet
-        self.shield = shield
-        self.x = x
-        self.y = y
-    
+        self.skill_status = [double_score, speed_up, magnet, shield]
+        self.coord = [x, y]
+
     def update_score(self, points):
         if self.double_score:
             self.score += points * 2
@@ -19,29 +26,30 @@ class Pacman:
             self.score += points
 
     def just_eat(self, board, x, y):
-        if board[x][y] ==2:
+        if board[x][y] == 2:
             self.update_score(1)
             board[x][y] = 1
-        elif board[self.x][self.y] ==3:
+        elif board[self.x][self.y] == 3:
             self.update_score(2)
             board[x][y] = 1
-        elif board[x][y] ==4:
-            self.activate_speed_up()
+        elif board[x][y] == 4:
+            self.acquire_skill(1)
             board[x][y] = 1
-        elif board[x][y] ==5:
-            self.activate_magnet()
+        elif board[x][y] == 5:
+            self.acquire_skill(2)
             board[x][y] = 1
-        elif board[x][y] ==6:
-            self.activate_shield()
+        elif board[x][y] == 6:
+            self.acquire_skill(3)
             board[x][y] = 1
-        elif board[x][y] ==7:
-            self.activate_double_score()
+        elif board[x][y] == 7:
+            self.acquire_skill1(0)
             board[x][y] = 1
-            
-    def eat_bean(self, board, x, y):
+
+    def eat_bean(self, board):
+        x, y = self.coord
         if not self.magnet:
             self.just_eat(board, x, y)
-                   
+
         else:
             self.just_eat(board, x, y)
             self.just_eat(board, x - 1, y - 1)
@@ -52,99 +60,65 @@ class Pacman:
             self.just_eat(board, x + 1, y - 1)
             self.just_eat(board, x + 1, y)
             self.just_eat(board, x + 1, y + 1)
-    
-    # 移动函数集成了加分和更新状态的功能
-    def W(self, board):
-        if self.speed_up:
-            self.x -= 1
-            self.eat_bean(board)
-            self.x -= 1
-            self.eat_bean(board)
-        else:
-            self.x -= 1
-            self.eat_bean(board)
-    
-    def A(self, board):
-        if self.speed_up:
-            self.y -= 1
-            self.eat_bean(board)
-            self.y -= 1
-            self.eat_bean(board)
-        else:
-            self.y -= 1
-            self.eat_bean(board)
-    
-    def S(self, board):
-        if self.speed_up:
-            self.x += 1
-            self.eat_bean(board)
-            self.x += 1
-            self.eat_bean(board)
-        else:
-            self.x += 1
-            self.eat_bean(board)
-    
-    def D(self, board):
-        if self.speed_up:
-            self.y += 1
-            self.eat_bean(board)
-            self.y += 1
-            self.eat_bean(board)
-        else:
-            self.y += 1
-            self.eat_bean(board)
-    
-    def activate_double_score(self, duration=10):
-        self.double_score = True
-        # 创建一个计时器，当时间到达时，护盾将被停用
-        timer = threading.Timer(duration, self.deactivate_double_score)
-        # 启动计时器
-        timer.start()
-    
-    def deactivate_double_score(self):
-        self.double_score = False
 
-    def activate_speed_up(self, duration=10):
-        self.speed_up = True
-        timer = threading.Timer(duration, self.deactivate_speed_up)
-        timer.start()
-        
-    def deactivate_speed_up(self):
-        self.speed_up = False
-    
-    def activate_magnet(self, duration=10):
-        self.magnet = True
-        timer = threading.Timer(duration, self.deactivate_magnet)
-        timer.start()
-    
-    def deactivate_magnet(self):
-        self.magnet = False
-    
-    def activate_shield(self, duration=10):
-        self.shield = True
-        timer = threading.Timer(duration, self.deactivate_shield)
-        timer.start()
-
-    def deactivate_shield(self):
-        self.shield = False
-    
     # 判断pacman是否撞墙，是否与ghost相遇的部分应该放在main函数中实现
-    
-    def encounter_ghost(self, board):
-        if self.shield:
-            self.shield = False
-            return
+
+    def coord(self):
+        return self.coord
+
+    def set_coord(self, coord):
+        self.coord = coord
+
+    def get_skills_status(self):
+        return self.skill_status
+
+    def acquire_skill(self, skill_index: int):
+        if skill_index > 2:
+            raise ValueError("Invalid skill index")
+        self.skill_status[skill_index] = DEFAULT_SKILL_TIME[skill_index]
+
+    def new_round(self):
+        if self.skill_status[0] > 0:
+            self.skill_status[0] -= 1
+        if self.skill_status[1] > 0:
+            self.skill_status[1] -= 1
+        if self.skill_status[2] > 0:
+            self.skill_status[2] -= 1
+
+    def score(self):
+        return self.score
+
+    def encounter_ghost(self):
+        if self.skill_status[3] > 0:
+            self.skill_status[3] -= 1
+            return False
         else:
-            self.score -= 100
-            self.respawn_at_non_zero(board)
-            
-    def respawn_at_non_zero(self, board):
-    # 找到所有元素不为0的位置，忽略最外面一圈
-        non_zero_positions = [(i, j) for i, row in enumerate(board[1:-1]) for j, element in enumerate(row[1:-1]) if element != 0]
-    # 随机选择一个位置
-        new_position = random.choice(non_zero_positions)
-    # 更新 Pacman 的位置
-        self.x, self.y = new_position
-        
-    # （lxy）我认为传送点应该用一个不同于空地的类型来表示，因为如果不是这样的话，在磁铁状态下，下标的访问会越界
-    
+            return True
+
+    def up(self, board):
+        if board[self.coord[0] - 1][self.coord[1]] != 0:
+            self.coord[0] -= 1
+            return True
+        else:
+            return False
+
+    def down(self, board):
+        if board[self.coord[0] + 1][self.coord[1]] != 0:
+            self.coord[0] += 1
+            return True
+        else:
+            return False
+
+    def left(self, board):
+        if board[self.coord[0]][self.coord[1] - 1] != 0:
+            self.coord[1] -= 1
+            return True
+        else:
+            return False
+
+    def right(self, board):
+        if board[self.coord[0]][self.coord[1] + 1] != 0:
+            self.coord[1] += 1
+            return True
+        else:
+            return False
