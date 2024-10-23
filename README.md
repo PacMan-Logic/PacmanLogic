@@ -18,14 +18,13 @@ action 为 0/1/2/3/4 表示 不动/上/下/左/右
 每局结束发给ai的info
 ```
 {
-    "pacman_pos": [x,y],
-    "pacman_skill": [double_score,speed_up,magnet,shield], # 一个数组，每一个数表示该技能剩余轮数
-    "pacman_score": score # pacman的分数
-    "ghost1_pos": [x1,y1],
-    "ghost2_pos": [x2,y2],
-    "ghost3_pos": [x3,y3],
-    "ghost_score": score # ghost的分数
-    "board": board # 二维数组棋盘
-    "board_round": round # 一个数，表示剩余的轮数
+    "player": self._player,
+    "ghosts_step_block": self._ghosts_step_block,
+    "pacman_step_block": self._pacman_step_block,
+    "pacman_skills": self._last_skill_status,
+    "round": self._round,
+    "score": self._score,
+    "level": self._level,
+    "StopReason": None,
 }
 ```
