@@ -221,9 +221,9 @@ if __name__ == "__main__":
             for i in range(2) :
                 state += 1
                 if player_type[players[i]] == 1:
-                    send_round_config(1, 1024)
+                    send_round_config(gamedata.MAX_AI_TIME, gamedata.MAX_LENGTH)
                 elif player_type[players[1-i]] == 2:
-                    send_round_config(60, 1024)
+                    send_round_config(gamedata.MAX_PLAYER_TIME, gamedata.MAX_LENGTH)
                 
                 # level发生改变时将初始化信息发给ai，未改变时发送空串
                 if level_change == 0:
@@ -264,15 +264,16 @@ if __name__ == "__main__":
         end_state = json.dumps(
             ["OK", "OK"]
         )
-
-        print("score_pacman: {}".format(env._score[0])) # 根据接口修改
-        print("score_ghost: {}".format(env._score[1])) # 根据接口修改
+        pacmanscore = env.pacman_score()
+        ghostscore = env.ghosts_score()
+        print("score_pacman: {}".format(pacmanscore)) 
+        print("score_ghost: {}".format(ghostscore)) 
 
         end_json = env.render()
         end_json["StopReason"] = f"time is up"
         end_info = {
-            "score_pacman": env._score[0],
-            "score_ghost": env._score[1],
+            "score_pacman": pacmanscore,
+            "score_ghost": ghostscore,
         }
 
         if player_type[0] == 2:

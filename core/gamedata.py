@@ -12,3 +12,7 @@ SPACE_CATEGORY = 9  # Note: 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed b
 SKILL_NUM = 4
 
 MAX_LEVEL = 3
+
+MAX_AI_TIME = 1
+MAX_PLAYER_TIME = 60
+MAX_LENGTH = 1024
