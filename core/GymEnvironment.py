@@ -9,23 +9,8 @@ from board import boardgenerator
 from pacman import Pacman
 from ghost import Ghost
 
+import gamedata
 # from ghost import Ghost
-
-
-# define constants
-ROUND_BONUS_GAMMA = 1
-EATEN_BY_GHOST = -20
-EAT_PACMAN = 30
-DESTORY_PACMAN_SHIELD = 5
-EAT_ALL_BEANS = 30
-PREVENT_PACMAN_EAT_ALL_BEANS = 20
-
-MAX_ROUND = 1000
-OPERATION_NUM = 5
-SPACE_CATEGORY = 9  # Note: 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed bean 5:magnet bean 6:shield bean 7:*2 bean 8:portal
-SKILL_NUM = 4
-
-MAX_LEVEL = 3
 
 
 class PacmanEnv(gym.Env):
@@ -47,7 +32,7 @@ class PacmanEnv(gym.Env):
         self.pacman = Pacman()
         self.ghosts = [Ghost(), Ghost(), Ghost()]
 
-        self._last_skill_status = [0] * SKILL_NUM
+        self._last_skill_status = [0] * gamedata.SKILL_NUM
 
         self.start_time = None
         self.max_time = 180  # 最长限时3分钟，后续可修改
@@ -60,11 +45,11 @@ class PacmanEnv(gym.Env):
         self._ghosts_step_block = []
 
         self.observation_space = spaces.MultiDiscrete(
-            np.ones((size, size)) * SPACE_CATEGORY
+            np.ones((size, size)) * gamedata.SPACE_CATEGORY
         )  # 这段代码定义了环境的观察空间。在强化学习中，观察空间代表了智能体可以观察到的环境状态的所有可能值
 
-        self.pacman_action_space = spaces.Discrete(OPERATION_NUM)
-        self.ghost_action_space = spaces.MultiDiscrete(np.ones(3) * OPERATION_NUM)
+        self.pacman_action_space = spaces.Discrete(gamedata.OPERATION_NUM)
+        self.ghost_action_space = spaces.MultiDiscrete(np.ones(3) * gamedata.OPERATION_NUM)
         # 这段代码定义了环境的动作空间。在训练过程中，吃豆人和幽灵应该索取不同的动作空间
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -251,10 +236,10 @@ class PacmanEnv(gym.Env):
             for j in self._ghosts_step_block:
                 if i == j[-1]:
                     if self.pacman.encounter_ghost():
-                        self.ghosts[i].update_score(DESTORY_PACMAN_SHIELD)
+                        self.ghosts[i].update_score(gamedata.DESTORY_PACMAN_SHIELD)
                     else:
-                        self.pacman.update_score(EATEN_BY_GHOST)
-                        self.ghosts[i].update_score(EAT_PACMAN)
+                        self.pacman.update_score(gamedata.EATEN_BY_GHOST)
+                        self.ghosts[i].update_score(gamedata.EAT_PACMAN)
                         self.pacman.set_coord(self.find_distant_emptyspace())
 
         # notice! its a new round
@@ -269,7 +254,7 @@ class PacmanEnv(gym.Env):
                     count_remain_beans += 1
         if count_remain_beans == 0:
             self.pacman.update_score(
-                EAT_ALL_BEANS + (MAX_ROUND - self.round) * ROUND_BONUS_GAMMA
+                gamedata.EAT_ALL_BEANS + (gamedata.MAX_ROUND - self.round) * gamedata.ROUND_BONUS_GAMMA
             )
             return (
                 self.board,
@@ -277,9 +262,9 @@ class PacmanEnv(gym.Env):
                 True,
             )  # true means game over
 
-        if self.round >= MAX_ROUND:
+        if self.round >= gamedata.MAX_ROUND:
             for i in self.ghosts:
-                i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
+                i.update_score(gamedata.PREVENT_PACMAN_EAT_ALL_BEANS)
             return self.board, [self.pacman_score, self.ghosts_score], True
 
         return self.board, [self.pacman_score, self.ghosts_score], False
@@ -310,6 +295,6 @@ class PacmanEnv(gym.Env):
     
     def next_level(self):
         self._level += 1
-        if self._level > MAX_LEVEL:
+        if self._level > gamedata.MAX_LEVEL:
             return True
         return False

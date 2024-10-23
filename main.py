@@ -5,9 +5,10 @@ import time
 from core.GymEnvironment import PacmanEnv
 from logic.utils import *
 
+import core.gamedata as gamedata
+
 ERROR_MAP = ["RE", "TLE", "OLE"]
 replay_file = None
-level = 0
 
 # FIXME: 在reset的时候随机幽灵和吃豆人的位置，这个处于创建环境之后、开始游戏之前
 
@@ -111,10 +112,12 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     1传str 2传json
     
     执行操作，输出要转发给对方的字符串
+
+    interact返回三个值: game_continue, info1, info2, level_change  info1和info2分别发给吃豆人和幽灵
     '''
     # 执行两个玩家的操作
     try:
-        info , level_change = env.step(pacman_action, pacman, ghost_action, ghost)
+        board , score , level_change = env.step(pacman_action, pacman, ghost_action, ghost)
     except:
         error = traceback.format_exc()
         return_dict = env.render()
@@ -133,15 +136,23 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
 
     if ghost_type == 2:
         send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), 1)
-
+    
+    game_continue = True
     # 返回新的状态信息
-    if new_state['steps']:
-        if pacman_type == 1 and pacman_type == 1:
-            return True, str(info), level_change
-        elif pacman_type == 2 or pacman_type == 2:
-            return True, json.dumps(info, ensure_ascii=False), level_change
+    if new_state['level'] != gamedata.MAX_LEVEL or new_state['round'] != gamedata.MAX_ROUND:
+        # 游戏没有结束
+        if pacman_type == 1 :
+            info1 = str(new_state)
+        elif pacman_type == 2 :
+            info1 = json.dumps(new_state, ensure_ascii=False)
+        if ghost_type == 2 :
+            info2 = str(new_state)
+        elif ghost_type == 2:
+            info2 = json.dumps(new_state, ensure_ascii=False)
     else:
-        return False, None, None
+        game_continue = False
+    
+    return game_continue , info1 , info2 , level_change
 
 
 if __name__ == "__main__":
@@ -199,9 +210,8 @@ if __name__ == "__main__":
         while game_continue:
             # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
             if level_change == 1:
-                level = level + 1
-                env.reset(level)
-                init_json = json.dumps(env.get_init_info(), ensure_ascii=False)
+                env.reset()
+                init_json = json.dumps(env.render(), ensure_ascii=False)
                 replay_file.write(init_json+'\n')
 
             if not game_continue:
@@ -242,14 +252,14 @@ if __name__ == "__main__":
             
             # 调用step
             state += 1
-            game_continue, info, level_change = interact(
+            game_continue , info1 , info2 , level_change = interact(
                 env, pacman_action, players[0], ghost_action, players[1], player_type[players[0]], player_type[players[1]]
             )
             send_round_info(
                 state,
                 [players[i]],
                 [players[i],players[1-i]],
-                [info,info],
+                [info1,info2],
             )
         end_state = json.dumps(
             ["OK", "OK"]
