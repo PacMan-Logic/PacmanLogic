@@ -131,7 +131,7 @@ class PacmanEnv(gym.Env):
 
     # step utils
     def check_round_end(self):
-        return self._round >= self._max_rounds
+        return self._round >= gamedata.MAX_ROUND
 
     def get_action(self, action):
         assert len(action) == 4
@@ -236,7 +236,7 @@ class PacmanEnv(gym.Env):
             for j in self._ghosts_step_block:
                 if i == j[-1]:
                     if self.pacman.encounter_ghost():
-                        self.ghosts[i].update_score(gamedata.DESTORY_PACMAN_SHIELD)
+                        self.ghosts[i].update_score(gamedata.DESTORY_PACMAN_SHIELD) # TODO: update_score
                     else:
                         self.pacman.update_score(gamedata.EATEN_BY_GHOST)
                         self.ghosts[i].update_score(gamedata.EAT_PACMAN)

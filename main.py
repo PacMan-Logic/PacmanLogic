@@ -21,7 +21,8 @@ def get_ai_info( player , player_type , another_player_type ):
         ai_info = receive_ai_info()
     # 判定交互对象状态
     # 如果交互对象异常则退出
-    if ai_info["player"] == -1: # judger 监听列表中的某个 AI 超时或发生错误 -> 终止游戏，返回错误信息
+    if ai_info["player"] == -1: 
+        # judger 监听列表中的某个 AI 超时或发生错误 -> 终止游戏，返回错误信息
         return_dict = env.render()
         error_info = json.loads(ai_info["content"])
         error_type = error_info['error']
@@ -113,7 +114,7 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     
     执行操作，输出要转发给对方的字符串
 
-    interact返回三个值: game_continue, info1, info2, level_change  info1和info2分别发给吃豆人和幽灵
+    interact返回四个值: game_continue, info1, info2, level_change  info1和info2分别发给吃豆人和幽灵
     '''
     # 执行两个玩家的操作
     try:
