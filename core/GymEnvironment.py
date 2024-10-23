@@ -25,6 +25,8 @@ OPERATION_NUM = 5
 SPACE_CATEGORY = 9  # Note: 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed bean 5:magnet bean 6:shield bean 7:*2 bean 8:portal
 SKILL_NUM = 4
 
+MAX_LEVEL = 3
+
 
 class PacmanEnv(gym.Env):
     metadata = {"render_modes": ["local", "logic", "ai"]}
@@ -103,6 +105,7 @@ class PacmanEnv(gym.Env):
                 # Note: 播放器需要根据是否有magnet属性确定每次移动的时候需要如何吸取豆子
                 "round": self._round,
                 "score": self._score,
+                "level": self._level,
                 "StopReason": None,
             }
             return return_dict
@@ -164,7 +167,7 @@ class PacmanEnv(gym.Env):
 
         pacman_skills = self.pacman.get_skills_status()
         pacman_coord = self.pacman.coord()
-        ghost_coords = [ghost.coord for ghost in self.ghosts]
+        ghost_coords = [ghost.coord() for ghost in self.ghosts]
 
         # pacman move
         # Note: double_score: 0, speed_up: 1, magnet: 2, shield: 3
@@ -243,6 +246,7 @@ class PacmanEnv(gym.Env):
                 raise ValueError("Invalid action of ghost")
 
         # check if ghosts caught pacman
+        # TODO: specialize return value when respawning
         for i in self._pacman_step_block[1:]:
             for j in self._ghosts_step_block:
                 if i == j[-1]:
@@ -303,3 +307,9 @@ class PacmanEnv(gym.Env):
         if coord == []:
             raise ValueError("No empty space found")
         return coord
+    
+    def next_level(self):
+        self._level += 1
+        if self._level > MAX_LEVEL:
+            return True
+        return False
