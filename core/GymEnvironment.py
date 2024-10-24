@@ -1,7 +1,7 @@
 import json
 import time
 from typing import List
-
+import random
 import gym
 import numpy as np
 from gym import spaces
@@ -17,25 +17,20 @@ class PacmanEnv(gym.Env):
     def __init__(
         self,
         render_mode=None,
-        size=40,
+        size=80, # this will subtract 20 in the reset function every time
     ):
         assert size >= 3
         self.size = size
 
         # Note: use round instead of time to terminate the game
         self.round = 0
-
-        self.board = boardgenerator(size)
-
+        self.boardlist = []
         self.pacman = Pacman()
         self.ghosts = [Ghost(), Ghost(), Ghost()]
 
         self._last_skill_status = [0] * SKILL_NUM
 
-        self.start_time = None
-        self.max_time = 180  # 最长限时3分钟，后续可修改
-
-        self._level = 1
+        self._level = 0 # Note: this will plus 1 in the reset function every time
 
         # store runtime details for rendering
         self._last_operation = []
@@ -101,33 +96,34 @@ class PacmanEnv(gym.Env):
     def ghost_action_space(self):
         return self.ghost_action_space
 
-    # TODO: 重写reset函数（lxy）
-    def reset(self, seed=None, board=None):
-        self.pacman.coord = [0,0]
-        self.ghosts[0].coord = [2,2]
-        self.ghosts[1].coord = [2,2]
-        self.ghosts[2].coord = [2,2] # wxt: 我随便写的，方便调试
-        if self._level == 1:  # 如果刚开始玩游戏,那就全要初始化
-            self.start_time = time.time()
-            self._round = 0
-            super().reset(seed=seed)
-            self._last_new = [[]]
-            self._last_operation = [
-                [-1],
-                [-1, -1, -1],
-            ]  # 分别代表吃豆人的行动操作（第一个数）和三个幽灵的行动操作（后三个数）
-            self._score = [0, 0]
-            self._player = 0
+    # TODO: 重写reset函数（lxy） done
+    def reset(self):
+        self.size -= 20 # 80 60 40 20
+        self._level += 1 # 0 1 2 3
+        
+        # regenerate at the corner
+        coords = [
+            [1, 1],
+            [1, self.size - 1],
+            [self.size - 1, 1],
+            [self.size - 1, self.size - 1]
+        ]
+        
+        # shuffle the coords
+        random.shuffle(coords)
+        
+        # distribute the coords
+        self.pacman.coord = coords[0]
+        self.ghosts[0].coord = coords[1]
+        self.ghosts[1].coord = coords[2]
+        self.ghosts[2].coord = coords[3]
+        
+        self.board = boardgenerator(self.size)
+        
+        self.boardlist.append(self.board) # Note: store the board for rendering
+        
+        self.round = 0
 
-        if board is not None:
-            self.board = board
-        else:
-            self.board = boardgenerator(self.size)
-
-        if self.render_mode == "logic":  # 在逻辑渲染模式下，更新游戏状态的表示
-            for i in range(self.size):
-                for j in range(self.size):
-                    self._last_new[0].append([i, j, int(self.board[i][j])])
 
     # step utils
     def check_round_end(self):
