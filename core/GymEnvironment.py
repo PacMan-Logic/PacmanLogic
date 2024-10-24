@@ -5,10 +5,10 @@ from typing import List
 import gym
 import numpy as np
 from gym import spaces
-from board import boardgenerator
-from pacman import Pacman
-from ghost import Ghost
-from gamedata import *
+from .board import boardgenerator
+from .pacman import Pacman
+from .ghost import Ghost
+from .gamedata import *
 
 
 class PacmanEnv(gym.Env):
