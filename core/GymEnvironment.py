@@ -27,7 +27,7 @@ class PacmanEnv(gym.Env):
         # Note: use round instead of time to terminate the game
         self.round = 0
 
-        self.board = [boardgenerator(size)]
+        self.board = boardgenerator(size)
 
         self.pacman = Pacman()
         self.ghosts = [Ghost(), Ghost(), Ghost()]
