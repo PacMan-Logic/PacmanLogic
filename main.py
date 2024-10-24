@@ -147,13 +147,15 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
             info1 = str(new_state)
         elif pacman_type == 2 :
             info1 = json.dumps(new_state, ensure_ascii=False)
-        if ghost_type == 2 :
+        
+        if ghost_type == 1 :
             info2 = str(new_state)
         elif ghost_type == 2:
             info2 = json.dumps(new_state, ensure_ascii=False)
     else:
         game_continue = False
-    
+        info1 = None
+        info2 = None
     return game_continue , info1 , info2 , level_change
 
 

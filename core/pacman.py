@@ -29,7 +29,7 @@ class Pacman:
         if board[x][y] == 2:
             self.update_score(1)
             board[x][y] = 1
-        elif board[self.x][self.y] == 3:
+        elif board[x][y] == 3:
             self.update_score(2)
             board[x][y] = 1
         elif board[x][y] == 4:

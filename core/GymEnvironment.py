@@ -169,27 +169,27 @@ class PacmanEnv(gym.Env):
                 self.pacman.eat_bean(self.board)
             elif pacmanAction == 1:  # 向上移动
                 self.pacman.eat_bean(self.board)
-                if self.pacman.up():
+                if self.pacman.up(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.up():
+                if self.pacman.up(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             elif pacmanAction == 2:  # 向左移动
                 self.pacman.eat_bean(self.board)
-                if self.pacman.left():
+                if self.pacman.left(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.left():
+                if self.pacman.left(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             elif pacmanAction == 3:  # 向下移动
                 self.pacman.eat_bean(self.board)
-                if self.pacman.down():
+                if self.pacman.down(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.down():
+                if self.pacman.down(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             elif pacmanAction == 4:  # 向右移动
                 self.pacman.eat_bean(self.board)
-                if self.pacman.right():
+                if self.pacman.right(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.right():
+                if self.pacman.right(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             else:  # 退出程序
                 raise ValueError("Invalid action number of speedy pacman")
@@ -198,19 +198,19 @@ class PacmanEnv(gym.Env):
                 self.pacman.eat_bean(self.board)
             elif pacmanAction == 1:
                 self.pacman.eat_bean(self.board)
-                if self.pacman.up():
+                if self.pacman.up(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             elif pacmanAction == 2:
                 self.pacman.eat_bean(self.board)
-                if self.pacman.left():
+                if self.pacman.left(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             elif pacmanAction == 3:
                 self.pacman.eat_bean(self.board)
-                if self.pacman.down():
+                if self.pacman.down(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             elif pacmanAction == 4:
                 self.pacman.eat_bean(self.board)
-                if self.pacman.right():
+                if self.pacman.right(self.board):
                     self._pacman_step_block.append(self.pacman.coord)
             else:
                 raise ValueError("Invalid action number of normal pacman")
