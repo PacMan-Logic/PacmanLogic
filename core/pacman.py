@@ -21,9 +21,9 @@ class Pacman:
 
     def update_score(self, points):
         if self.skill_status[0] == 0:
-            self.score += points * 2
+            self.score += points 
         else:
-            self.score += points
+            self.score += points * 2
 
     def just_eat(self, board, x, y):
         if board[x][y] == 2:
