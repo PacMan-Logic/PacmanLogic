@@ -138,10 +138,12 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
 
     if ghost_type == 2:
         send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), 1)
-    
-    game_continue = True
+
     # 返回新的状态信息
-    if new_state['level'] != MAX_LEVEL or new_state['round'] != MAX_ROUND:
+    game_continue = True
+    info1 = None
+    info2 = None
+    if new_state['level'] != MAX_LEVEL or env.check_round_end() == False:
         # 游戏没有结束
         if pacman_type == 1 :
             info1 = str(new_state)
@@ -154,8 +156,7 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
             info2 = json.dumps(new_state, ensure_ascii=False)
     else:
         game_continue = False
-        info1 = None
-        info2 = None
+
     return game_continue , info1 , info2 , level_change
 
 

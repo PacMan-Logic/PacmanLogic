@@ -146,7 +146,7 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     
     game_continue = True
     # 返回新的状态信息
-    if new_state['level'] != MAX_LEVEL or new_state['round'] != MAX_ROUND:
+    if new_state['level'] != MAX_LEVEL or env.check_round_end() == False:
         # 游戏没有结束
         if pacman_type == 1 :
             info1 = str(new_state)
