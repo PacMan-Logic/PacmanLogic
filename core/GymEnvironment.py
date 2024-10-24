@@ -5,11 +5,11 @@ from typing import List
 import gym
 import numpy as np
 from gym import spaces
-from board import boardgenerator
-from pacman import Pacman
-from ghost import Ghost
+from .board import boardgenerator
+from .pacman import Pacman
+from .ghost import Ghost
 
-import gamedata
+from .gamedata import *
 # from ghost import Ghost
 
 
@@ -27,12 +27,12 @@ class PacmanEnv(gym.Env):
         # Note: use round instead of time to terminate the game
         self.round = 0
 
-        self.board = boardgenerator(size)
+        self.board = [boardgenerator(size)]
 
         self.pacman = Pacman()
         self.ghosts = [Ghost(), Ghost(), Ghost()]
 
-        self._last_skill_status = [0] * gamedata.SKILL_NUM
+        self._last_skill_status = [0] * SKILL_NUM
 
         self.start_time = None
         self.max_time = 180  # 最长限时3分钟，后续可修改
@@ -45,11 +45,11 @@ class PacmanEnv(gym.Env):
         self._ghosts_step_block = []
 
         self.observation_space = spaces.MultiDiscrete(
-            np.ones((size, size)) * gamedata.SPACE_CATEGORY
+            np.ones((size, size)) * SPACE_CATEGORY
         )  # 这段代码定义了环境的观察空间。在强化学习中，观察空间代表了智能体可以观察到的环境状态的所有可能值
 
-        self.pacman_action_space = spaces.Discrete(gamedata.OPERATION_NUM)
-        self.ghost_action_space = spaces.MultiDiscrete(np.ones(3) * gamedata.OPERATION_NUM)
+        self.pacman_action_space = spaces.Discrete(OPERATION_NUM)
+        self.ghost_action_space = spaces.MultiDiscrete(np.ones(3) * OPERATION_NUM)
         # 这段代码定义了环境的动作空间。在训练过程中，吃豆人和幽灵应该索取不同的动作空间
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -107,6 +107,10 @@ class PacmanEnv(gym.Env):
 
     # TODO: 重写reset函数（lxy）
     def reset(self, seed=None, board=None):
+        self.pacman.coord = [0,0]
+        self.ghosts[0].coord = [2,2]
+        self.ghosts[1].coord = [2,2]
+        self.ghosts[2].coord = [2,2] # wxt: 我随便写的，方便调试
         if self._level == 1:  # 如果刚开始玩游戏,那就全要初始化
             self.start_time = time.time()
             self._round = 0
@@ -131,7 +135,7 @@ class PacmanEnv(gym.Env):
 
     # step utils
     def check_round_end(self):
-        return self._round >= gamedata.MAX_ROUND
+        return self._round >= MAX_ROUND
 
     def get_action(self, action):
         assert len(action) == 4
@@ -151,13 +155,13 @@ class PacmanEnv(gym.Env):
         self._last_operation = [pacmanAction, ghostAction]
 
         pacman_skills = self.pacman.get_skills_status()
-        pacman_coord = self.pacman.coord()
-        ghost_coords = [ghost.coord() for ghost in self.ghosts]
+        pacman_coord = self.pacman.get_coord()
+        ghost_coords = [ghost.get_coord() for ghost in self.ghosts]
 
         # pacman move
         # Note: double_score: 0, speed_up: 1, magnet: 2, shield: 3
         self._pacman_step_block.append(pacman_coord)
-        for i in range(self.ghosts):
+        for i in range(3):
             self._ghosts_step_block[i].append(ghost_coords[i])
 
         if pacman_skills[1] > 0:
@@ -236,10 +240,10 @@ class PacmanEnv(gym.Env):
             for j in self._ghosts_step_block:
                 if i == j[-1]:
                     if self.pacman.encounter_ghost():
-                        self.ghosts[i].update_score(gamedata.DESTORY_PACMAN_SHIELD) # TODO: update_score
+                        self.ghosts[i].update_score(DESTORY_PACMAN_SHIELD) # TODO: update_score
                     else:
-                        self.pacman.update_score(gamedata.EATEN_BY_GHOST)
-                        self.ghosts[i].update_score(gamedata.EAT_PACMAN)
+                        self.pacman.update_score(EATEN_BY_GHOST)
+                        self.ghosts[i].update_score(EAT_PACMAN)
                         self.pacman.set_coord(self.find_distant_emptyspace())
 
         # notice! its a new round
@@ -254,7 +258,7 @@ class PacmanEnv(gym.Env):
                     count_remain_beans += 1
         if count_remain_beans == 0:
             self.pacman.update_score(
-                gamedata.EAT_ALL_BEANS + (gamedata.MAX_ROUND - self.round) * gamedata.ROUND_BONUS_GAMMA
+                EAT_ALL_BEANS + (MAX_ROUND - self.round) * ROUND_BONUS_GAMMA
             )
             return (
                 self.board,
@@ -262,9 +266,9 @@ class PacmanEnv(gym.Env):
                 True,
             )  # true means game over
 
-        if self.round >= gamedata.MAX_ROUND:
+        if self.round >= MAX_ROUND:
             for i in self.ghosts:
-                i.update_score(gamedata.PREVENT_PACMAN_EAT_ALL_BEANS)
+                i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
             return self.board, [self.pacman_score, self.ghosts_score], True
 
         return self.board, [self.pacman_score, self.ghosts_score], False
@@ -295,6 +299,6 @@ class PacmanEnv(gym.Env):
     
     def next_level(self):
         self._level += 1
-        if self._level > gamedata.MAX_LEVEL:
+        if self._level > MAX_LEVEL:
             return True
         return False

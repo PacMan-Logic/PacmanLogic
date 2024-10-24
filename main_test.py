@@ -1,3 +1,8 @@
+'''
+本文件用以调试，可通过在控制台输入幽灵和吃豆人的操作获取执行信息 but不包括对于操作合法性的判断和各种发包操作的检查
+'''
+
+
 import json
 import random
 import time
@@ -162,7 +167,12 @@ if __name__ == "__main__":
 
     try:
         # 接收judger的初始化信息
-        init_info = receive_init_info()
+        init_info = {
+            "player_list": [1, 1],
+            "player_num": 2,
+            "config": {"random_seed": 1674552577091},
+            "replay": "./replay/replay.json"
+        }
         replay_path = init_info["replay"]
         replay_dir = os.path.dirname(replay_path)
         if not os.path.exists(replay_dir):
@@ -176,8 +186,9 @@ if __name__ == "__main__":
 
         env = PacmanEnv('logic')
         # 每局游戏唯一的游戏状态类，所有的修改应该在此对象中进行
-
+        
         player_type = init_info["player_list"] # 0 表示未正常启动，1 表示本地 AI，2 表示网页播放器
+        print(player_type)
         players = [0,1] # 0 为吃豆人，1 为幽灵
         pacman_action = []
         ghost_action = []
@@ -250,11 +261,14 @@ if __name__ == "__main__":
                             str(init_json) if player_type[1] == 1 else init_json,
                         ],
                     )
+                    print( init_json )
 
                 if i == 0:
-                    pacman_action = get_ai_info(players[i],player_type[i],player_type[1-i])
+                    pacman_action = int(input())
+                    print( pacman_action )
                 else:
-                    ghost_action = get_ai_info(players[i],player_type[i],player_type[1-i])
+                    ghost_action = [float(num) for num in input().split()]
+                    print( ghost_action )
             
             # 调用step
             state += 1

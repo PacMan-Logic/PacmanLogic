@@ -3,7 +3,7 @@ class Ghost:
         self._coord = [-1, -1]
         self.score = 0
 
-    def coord(self):
+    def get_coord(self):
         return self._coord
 
     def set_coord(self, coord):

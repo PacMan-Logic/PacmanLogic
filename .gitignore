@@ -2,6 +2,10 @@ agent_test/*
 agent_test
 PacMan/*
 PacMan
+replay/*
+replay
 .DS_Store
 core/__pycache__/*
 core/__pycache__
+logic/__pycache__/*
+logic/__pycache__

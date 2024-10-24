@@ -20,7 +20,7 @@ class Pacman:
         self.coord = [x, y]
 
     def update_score(self, points):
-        if self.double_score:
+        if self.skill_status[0] == 0:
             self.score += points * 2
         else:
             self.score += points
@@ -47,7 +47,7 @@ class Pacman:
 
     def eat_bean(self, board):
         x, y = self.coord
-        if not self.magnet:
+        if self.skill_status[2] == 0:
             self.just_eat(board, x, y)
 
         else:
@@ -63,7 +63,7 @@ class Pacman:
 
     # 判断pacman是否撞墙，是否与ghost相遇的部分应该放在main函数中实现
 
-    def coord(self):
+    def get_coord(self):
         return self.coord
 
     def set_coord(self, coord):
@@ -85,7 +85,7 @@ class Pacman:
         if self.skill_status[2] > 0:
             self.skill_status[2] -= 1
 
-    def score(self):
+    def get_score(self):
         return self.score
 
     def encounter_ghost(self):
