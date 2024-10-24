@@ -5,12 +5,10 @@ from typing import List
 import gym
 import numpy as np
 from gym import spaces
-from .board import boardgenerator
-from .pacman import Pacman
-from .ghost import Ghost
-
-from .gamedata import *
-# from ghost import Ghost
+from board import boardgenerator
+from pacman import Pacman
+from ghost import Ghost
+from gamedata import *
 
 
 class PacmanEnv(gym.Env):
@@ -19,7 +17,7 @@ class PacmanEnv(gym.Env):
     def __init__(
         self,
         render_mode=None,
-        size=20,
+        size=40,
     ):
         assert size >= 3
         self.size = size
@@ -77,8 +75,6 @@ class PacmanEnv(gym.Env):
                         print("\033[1;46m  \033[0m", end="")  # 护盾豆子：青
                     elif self.board[i][j] == 7:
                         print("\033[1;48m  \033[0m", end="")  # *2豆子：灰
-                    elif self.board[i][j] == 8:
-                        print("\033[48;5;27m  \033[0m", end="")  # 传送门
                 print()
 
         elif self.render_mode == "logic":  # 返回一个字典
@@ -236,10 +232,11 @@ class PacmanEnv(gym.Env):
 
         # check if ghosts caught pacman
         # TODO: specialize return value when respawning
+        # Note: Original code corresponding wrongly
         for i in self._pacman_step_block[1:]:
             for j in self._ghosts_step_block:
                 if i == j[-1]:
-                    if self.pacman.encounter_ghost():
+                    if not self.pacman.encounter_ghost():
                         self.ghosts[i].update_score(DESTORY_PACMAN_SHIELD) # TODO: update_score
                     else:
                         self.pacman.update_score(EATEN_BY_GHOST)

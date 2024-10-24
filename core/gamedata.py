@@ -8,7 +8,7 @@ PREVENT_PACMAN_EAT_ALL_BEANS = 20
 
 MAX_ROUND = 1000 # 每个棋盘最多轮数
 OPERATION_NUM = 5 # 操作数（上下左右不动）
-SPACE_CATEGORY = 9  # Note: 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed bean 5:magnet bean 6:shield bean 7:*2 bean 8:portal
+SPACE_CATEGORY = 8  # Note: 0:wall 1:empty 2:regular bean 3:bonus bean 4:speed bean 5:magnet bean 6:shield bean 7:*2 bean
 SKILL_NUM = 4
 
 MAX_LEVEL = 3 # 关卡数

@@ -16,25 +16,28 @@ class Ghost:
         return self.score
 
     def up(self, board):
-        if board[self._coord[0] - 1][self._coord[1]] == 1:
+        if board[self._coord[0] - 1][self._coord[1]] == 0:
             return False
         self._coord[0] -= 1
         return True
 
     def down(self, board):
-        if board[self._coord[0] + 1][self._coord[1]] == 1:
+        if board[self._coord[0] + 1][self._coord[1]] == 0:
             return False
         self._coord[0] += 1
         return True
 
     def left(self, board):
-        if board[self._coord[0]][self._coord[1] - 1] == 1:
+        if board[self._coord[0]][self._coord[1] - 1] == 0:
             return False
         self._coord[1] -= 1
         return True
 
     def right(self, board):
-        if board[self._coord[0]][self._coord[1] + 1] == 1:
+        if board[self._coord[0]][self._coord[1] + 1] == 0:
             return False
         self._coord[1] += 1
         return True
+    
+    def update_score(self, points):
+        self.score += points

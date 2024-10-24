@@ -77,7 +77,7 @@ class Pacman:
             raise ValueError("Invalid skill index")
         self.skill_status[skill_index] = DEFAULT_SKILL_TIME[skill_index]
 
-    def new_round(self):
+    def new_round(self): # Note: reset the skill status when a new round starts
         if self.skill_status[0] > 0:
             self.skill_status[0] -= 1
         if self.skill_status[1] > 0:
