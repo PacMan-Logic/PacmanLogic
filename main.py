@@ -273,8 +273,8 @@ if __name__ == "__main__":
         end_state = json.dumps(
             ["OK", "OK"]
         )
-        pacmanscore = env.pacman_score()
-        ghostscore = env.ghosts_score()
+        pacmanscore = env.pacman_score
+        ghostscore = env.ghosts_score
         print("score_pacman: {}".format(pacmanscore)) 
         print("score_ghost: {}".format(ghostscore)) 
 

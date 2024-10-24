@@ -12,7 +12,7 @@ class Ghost:
     def update_score(self, points):
         self.score += points
 
-    def score(self):
+    def get_score(self):
         return self.score
 
     def up(self, board):

@@ -21,9 +21,10 @@ class PacmanEnv(gym.Env):
     ):
         assert size >= 3
         self.size = size
+        self._player = 0
 
         # Note: use round instead of time to terminate the game
-        self.round = 0
+        self._round = 0
         self.boardlist = []
         self.pacman = Pacman()
         self.ghosts = [Ghost(), Ghost(), Ghost()]
@@ -36,6 +37,8 @@ class PacmanEnv(gym.Env):
         self._last_operation = []
         self._pacman_step_block = []
         self._ghosts_step_block = []
+        self.pacman_score = 0
+        self.ghosts_score = 0
 
         self.observation_space = spaces.MultiDiscrete(
             np.ones((size, size)) * SPACE_CATEGORY
@@ -50,7 +53,6 @@ class PacmanEnv(gym.Env):
 
     # return the current state of the game
     def render(self):
-        # TODO(lxy): 修改墙的显示
         if self.render_mode == "local":
             for i in range(self.size):
                 for j in range(self.size):
@@ -80,7 +82,7 @@ class PacmanEnv(gym.Env):
                 "pacman_skills": self._last_skill_status,
                 # Note: 播放器需要根据是否有magnet属性确定每次移动的时候需要如何吸取豆子
                 "round": self._round,
-                "score": self._score,
+                "score": [self.pacman_score, self.ghosts_score],
                 "level": self._level,
                 "StopReason": None,
             }
@@ -122,7 +124,7 @@ class PacmanEnv(gym.Env):
         
         self.boardlist.append(self.board) # Note: store the board for rendering
         
-        self.round = 0
+        self._round = 0
 
 
     # step utils
@@ -137,6 +139,10 @@ class PacmanEnv(gym.Env):
 
     def num_to_coord(self, num):
         return num // self.size, num % self.size
+
+    def update_all_score(self):
+        self.pacman_score = self.get_pacman_score()
+        self.ghosts_score = self.get_ghosts_score()
 
     def step(self, pacmanAction: int, ghostAction: List[int]):
         self._last_operation = []
@@ -240,7 +246,7 @@ class PacmanEnv(gym.Env):
                         self.pacman.set_coord(self.find_distant_emptyspace())
 
         # notice! its a new round
-        self.round += 1
+        self._round += 1
         self.pacman.new_round()
 
         # check if the game is over
@@ -251,25 +257,26 @@ class PacmanEnv(gym.Env):
                     count_remain_beans += 1
         if count_remain_beans == 0:
             self.pacman.update_score(
-                EAT_ALL_BEANS + (MAX_ROUND[self._level] - self.round) * ROUND_BONUS_GAMMA
+                EAT_ALL_BEANS + (MAX_ROUND[self._level] - self._round) * ROUND_BONUS_GAMMA
             )
+            self.update_all_score()
             return (
                 self.board,
                 [self.pacman_score, self.ghosts_score],
                 True,
             )  # true means game over
-
-        if self.round >= MAX_ROUND[self._level]:
+        self.update_all_score()
+        if self._round >= MAX_ROUND[self._level]:
             for i in self.ghosts:
                 i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
             return self.board, [self.pacman_score, self.ghosts_score], True
 
         return self.board, [self.pacman_score, self.ghosts_score], False
 
-    def pacman_score(self):
-        return self.pacman.score
+    def get_pacman_score(self):
+        return self.pacman.get_score()
 
-    def ghosts_score(self):
+    def get_ghosts_score(self):
         ghost_scores = [ghost.score for ghost in self.ghosts]
         return sum(ghost_scores)
 
