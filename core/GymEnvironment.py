@@ -11,6 +11,9 @@ from .ghost import Ghost
 from .gamedata import *
 
 
+import os
+
+
 def opposite_direction(x, y):
     if x == 0 or y == 0:
         return True
@@ -34,7 +37,7 @@ class PacmanEnv(gym.Env):
     def __init__(
         self,
         render_mode=None,
-        size=80,  # this will subtract 20 in the reset function every time
+        size=INITIAL_BOARD_SIZE,  # this will subtract 20 in the reset function every time
     ):
         assert size >= 3
         self._size = size
@@ -72,10 +75,19 @@ class PacmanEnv(gym.Env):
         self.render_mode = render_mode
 
     # return the current state of the game
-    def render(self):
-        if self.render_mode == "local":
+    # FIXME: 有测试更改
+    def render(self, mode="logic"):
+        if mode == "local":
+            #os.system("clear")
             for i in range(self._size):
                 for j in range(self._size):
+                    if self._pacman.get_coord() == [i, j]:
+                        print("\033[1;40m  \033[0m", end="")
+                        continue
+                    if [i, j] in [ghost.get_coord() for ghost in self._ghosts]:
+                        print("\033[1;40m  \033[0m", end="")
+                        continue
+                    
                     if self._board[i][j] == 0:
                         print("\033[1;41m  \033[0m", end="")  # 墙：红
                     elif self._board[i][j] == 1:
@@ -94,7 +106,7 @@ class PacmanEnv(gym.Env):
                         print("\033[1;48m  \033[0m", end="")  # *2豆子：灰
                 print()
 
-        elif self.render_mode == "logic":  # 返回一个字典
+        elif mode == "logic":  # 返回一个字典
             return_dict = {
                 "player": self._player,
                 "ghosts_step_block": self._ghosts_step_block,
@@ -321,8 +333,8 @@ class PacmanEnv(gym.Env):
                     self._ghosts[i].get_coord()
                     if self._ghosts[i].up(self._board)
                     else [
-                        self._ghosts[i].get_coord()[0] - 100 - 1,
-                        self._ghosts[i].get_coord()[1] - 100,
+                        self._ghosts[i].get_coord()[0] - 200 - 1,
+                        self._ghosts[i].get_coord()[1] - 200,
                     ]
                 )
             elif ghostAction[i] == 2:
@@ -330,8 +342,8 @@ class PacmanEnv(gym.Env):
                     self._ghosts[i].get_coord()
                     if self._ghosts[i].left(self._board)
                     else [
-                        self._ghosts[i].get_coord()[0] - 100,
-                        self._ghosts[i].get_coord()[1] - 100 - 1,
+                        self._ghosts[i].get_coord()[0] - 200,
+                        self._ghosts[i].get_coord()[1] - 200 - 1,
                     ]
                 )
             elif ghostAction[i] == 3:
@@ -339,8 +351,8 @@ class PacmanEnv(gym.Env):
                     self._ghosts[i].get_coord()
                     if self._ghosts[i].down(self._board)
                     else [
-                        self._ghosts[i].get_coord()[0] - 100 + 1,
-                        self._ghosts[i].get_coord()[1] - 100,
+                        self._ghosts[i].get_coord()[0] - 200 + 1,
+                        self._ghosts[i].get_coord()[1] - 200,
                     ]
                 )
             elif ghostAction[i] == 4:
@@ -348,8 +360,8 @@ class PacmanEnv(gym.Env):
                     self._ghosts[i].get_coord()
                     if self._ghosts[i].right(self._board)
                     else [
-                        self._ghosts[i].get_coord()[0] - 100,
-                        self._ghosts[i].get_coord()[1] - 100 + 1,
+                        self._ghosts[i].get_coord()[0] - 200,
+                        self._ghosts[i].get_coord()[1] - 200 + 1,
                     ]
                 )
             else:
@@ -431,9 +443,9 @@ class PacmanEnv(gym.Env):
             for j in range(self._size):
                 if self._board[i][j] == Space.EMPTY.value:
                     sum = 0
-                    for i in self._ghosts:
-                        sum += abs(i.get_coord()[0] - i) + abs(i.get_coord()[1] - j)
-                    if max > sum:
+                    for k in self._ghosts:
+                        sum += abs(k.get_coord()[0] - i) + abs(k.get_coord()[1] - j)
+                    if sum > max:
                         max = sum
                         coord = [i, j]
         if coord == []:

@@ -10,8 +10,8 @@ import os
 
 from core.GymEnvironment import PacmanEnv
 from logic.utils import *
-
 from core.gamedata import *
+from random_seed import set_seed
 
 ERROR_MAP = ["RE", "TLE", "OLE"]
 replay_file = None
@@ -135,6 +135,7 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
         exit(0)
 
     # 更新游戏状态
+    env.render(mode='local')
     new_state = env.render()
     replay_file.write(json.dumps(new_state, ensure_ascii=False) + "\n")
 
@@ -166,6 +167,7 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
 
 if __name__ == "__main__":
     import traceback
+    set_seed() # 设置随机种子，方便调试
 
     try:
         # 接收judger的初始化信息
@@ -181,16 +183,18 @@ if __name__ == "__main__":
             os.makedirs(replay_dir)
         replay_file = open(replay_path, 'w')
         # 设置随机种子
+        ''' 这个貌似没有任何效果
         try:
             seed = init_info["config"]["random_seed"]
         except:
             seed = random.randint(1, 100000000)
+        '''
 
         env = PacmanEnv('logic')
         # 每局游戏唯一的游戏状态类，所有的修改应该在此对象中进行
         
         player_type = init_info["player_list"] # 0 表示未正常启动，1 表示本地 AI，2 表示网页播放器
-        print(player_type)
+        # print(player_type)
         players = [0,1] # 0 为吃豆人，1 为幽灵
         pacman_action = []
         ghost_action = []
@@ -232,6 +236,9 @@ if __name__ == "__main__":
                 env.reset()
                 init_json = json.dumps(env.render(), ensure_ascii=False)
                 replay_file.write(init_json+'\n')
+                
+                # test
+                env.render(mode='local')
 
             if not game_continue:
                 break
@@ -288,6 +295,7 @@ if __name__ == "__main__":
         )
         pacmanscore = env.pacman_score
         ghostscore = env.ghosts_score
+
         print("score_pacman: {}".format(pacmanscore)) 
         print("score_ghost: {}".format(ghostscore)) 
 

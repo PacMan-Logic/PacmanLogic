@@ -5,8 +5,8 @@ import os
 
 from core.GymEnvironment import PacmanEnv
 from logic.utils import *
-
 from core.gamedata import *
+# from random_seed import set_seed
 
 ERROR_MAP = ["RE", "TLE", "OLE"]
 replay_file = None
@@ -162,6 +162,8 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
 
 if __name__ == "__main__":
     import traceback
+    
+    # set_seed()
 
     try:
         # 接收judger的初始化信息
