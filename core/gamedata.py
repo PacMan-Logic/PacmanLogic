@@ -1,3 +1,5 @@
+import enum
+
 # define constants
 ROUND_BONUS_GAMMA = 1
 EATEN_BY_GHOST = -20
@@ -17,3 +19,29 @@ MAX_LEVEL = 3 # 关卡数
 MAX_AI_TIME = 1
 MAX_PLAYER_TIME = 60
 MAX_LENGTH = 1024
+
+
+DEFAULT_SKILL_TIME = [10, 10, 10]
+
+class Space(enum.Enum):
+    WALL = 0
+    EMPTY = 1
+    REGULAR_BEAN = 2
+    BONUS_BEAN = 3
+    SPEED_BEAN = 4
+    MAGNET_BEAN = 5
+    SHIELD_BEAN = 6
+    DOUBLE_BEAN = 7
+    
+class Skill(enum.Enum):
+    DOUBLE_SCORE = 0
+    SPEED_UP = 1
+    MAGNET = 2
+    SHIELD = 3
+    
+    
+class StatusCode(enum.Enum):
+    NORMAL = 0
+    CAUGHT = 1
+    DESTROY_SHIELD = 2
+    END = 3

@@ -11,41 +11,61 @@ from .ghost import Ghost
 from .gamedata import *
 
 
+def opposite_direction(x, y):
+    if x == 0 or y == 0:
+        return True
+    if (x == 1 and y == 3) or (x == 3 and y == 1):
+        return True
+    if (x == 2 and y == 4) or (x == 4 and y == 2):
+        return True
+
+
+def have_same_element(a, b):
+    for i in a:
+        if i in b:
+            return True
+    else:
+        return False
+
+
 class PacmanEnv(gym.Env):
     metadata = {"render_modes": ["local", "logic", "ai"]}
 
     def __init__(
         self,
         render_mode=None,
-        size=80, # this will subtract 20 in the reset function every time
+        size=80,  # this will subtract 20 in the reset function every time
     ):
         assert size >= 3
-        self.size = size
+        self._size = size
         self._player = 0
 
         # Note: use round instead of time to terminate the game
         self._round = 0
-        self.boardlist = []
-        self.pacman = Pacman()
-        self.ghosts = [Ghost(), Ghost(), Ghost()]
+        self._boardlist = []
+        self._pacman = Pacman()
+        self._ghosts = [Ghost(), Ghost(), Ghost()]
+
+        # Note: 0:nothing happens, 1:caught by ghost, 2:destroy the shield, 3:finish the game
+        self._status_code = StatusCode.NORMAL
 
         self._last_skill_status = [0] * SKILL_NUM
 
-        self._level = 0 # Note: this will plus 1 in the reset function every time
+        self._level = 0  # Note: this will plus 1 in the reset function every time
 
         # store runtime details for rendering
         self._last_operation = []
         self._pacman_step_block = []
-        self._ghosts_step_block = []
-        self.pacman_score = 0
-        self.ghosts_score = 0
+        self._ghosts_step_block = [[], [], []]
+        self._pacman_score = 0
+        self._ghosts_score = 0
 
         self.observation_space = spaces.MultiDiscrete(
             np.ones((size, size)) * SPACE_CATEGORY
         )  # 这段代码定义了环境的观察空间。在强化学习中，观察空间代表了智能体可以观察到的环境状态的所有可能值
 
-        self.pacman_action_space = spaces.Discrete(OPERATION_NUM)
-        self.ghost_action_space = spaces.MultiDiscrete(np.ones(3) * OPERATION_NUM)
+        self._pacman_action_space = spaces.Discrete(OPERATION_NUM)
+        self._ghost_action_space = spaces.MultiDiscrete(np.ones(3) * OPERATION_NUM)
         # 这段代码定义了环境的动作空间。在训练过程中，吃豆人和幽灵应该索取不同的动作空间
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -54,23 +74,23 @@ class PacmanEnv(gym.Env):
     # return the current state of the game
     def render(self):
         if self.render_mode == "local":
-            for i in range(self.size):
-                for j in range(self.size):
-                    if self.board[i][j] == 0:
+            for i in range(self._size):
+                for j in range(self._size):
+                    if self._board[i][j] == 0:
                         print("\033[1;41m  \033[0m", end="")  # 墙：红
-                    elif self.board[i][j] == 1:
+                    elif self._board[i][j] == 1:
                         print("\033[1;43m  \033[0m", end="")  # 空地：黄
-                    elif self.board[i][j] == 2:
+                    elif self._board[i][j] == 2:
                         print("\033[1;44m  \033[0m", end="")  # 普通豆子：蓝
-                    elif self.board[i][j] == 3:
+                    elif self._board[i][j] == 3:
                         print("\033[1;42m  \033[0m", end="")  # 奖励豆子：绿
-                    elif self.board[i][j] == 4:
+                    elif self._board[i][j] == 4:
                         print("\033[1;47m  \033[0m", end="")  # 速度豆子：白
-                    elif self.board[i][j] == 5:
+                    elif self._board[i][j] == 5:
                         print("\033[1;45m  \033[0m", end="")  # 磁铁豆子：紫
-                    elif self.board[i][j] == 6:
+                    elif self._board[i][j] == 6:
                         print("\033[1;46m  \033[0m", end="")  # 护盾豆子：青
-                    elif self.board[i][j] == 7:
+                    elif self._board[i][j] == 7:
                         print("\033[1;48m  \033[0m", end="")  # *2豆子：灰
                 print()
 
@@ -82,9 +102,10 @@ class PacmanEnv(gym.Env):
                 "pacman_skills": self._last_skill_status,
                 # Note: 播放器需要根据是否有magnet属性确定每次移动的时候需要如何吸取豆子
                 "round": self._round,
-                "score": [self.pacman_score, self.ghosts_score],
+                "score": [self._pacman_score, self._ghosts_score],
                 "level": self._level,
                 "StopReason": None,
+                "status": self._status_code.value,
             }
             return return_dict
 
@@ -93,39 +114,40 @@ class PacmanEnv(gym.Env):
         return self.observation_space
 
     def pacman_action_space(self):
-        return self.pacman_action_space
+        return self._pacman_action_space
 
     def ghost_action_space(self):
-        return self.ghost_action_space
+        return self._ghost_action_space
 
     # TODO: 重写reset函数（lxy） done
     def reset(self):
-        self.size -= 20 # 80 60 40 20
-        self._level += 1 # 0 1 2 3
-        
+        self._size -= 20  # 80 60 40 20
+        self._level += 1  # 0 1 2 3
+
         # regenerate at the corner
         coords = [
             [1, 1],
-            [1, self.size - 1],
-            [self.size - 1, 1],
-            [self.size - 1, self.size - 1]
+            [1, self._size - 2],
+            [self._size - 2, 1],
+            [self._size - 2, self._size - 2],
         ]
-        
+
         # shuffle the coords
         random.shuffle(coords)
-        
+
         # distribute the coords
-        self.pacman.coord = coords[0]
-        self.ghosts[0].coord = coords[1]
-        self.ghosts[1].coord = coords[2]
-        self.ghosts[2].coord = coords[3]
-        
-        self.board = boardgenerator(self.size)
-        
-        self.boardlist.append(self.board) # Note: store the board for rendering
-        
+        self._pacman.set_coord(coords[0])
+        self._ghosts[0].set_coord(coords[1])
+        self._ghosts[1].set_coord(coords[2])
+        self._ghosts[2].set_coord(coords[3])
+
+        self._board = boardgenerator(self._size)
+
+        self._boardlist.append(self._board)  # Note: store the board for rendering
+
         self._round = 0
 
+        self._status_code = StatusCode.NORMAL
 
     # step utils
     def check_round_end(self):
@@ -138,167 +160,291 @@ class PacmanEnv(gym.Env):
         return pacman, ghost
 
     def num_to_coord(self, num):
-        return num // self.size, num % self.size
+        return num // self._size, num % self._size
 
     def update_all_score(self):
-        self.pacman_score = self.get_pacman_score()
-        self.ghosts_score = self.get_ghosts_score()
+        self._pacman_score = self.get_pacman_score()
+        self._ghosts_score = self.get_ghosts_score()
 
+    # Note: 如果撞墙(x,y), step(x-100, y-100)
     def step(self, pacmanAction: int, ghostAction: List[int]):
+
         self._last_operation = []
         self._ghosts_step_block = [[], [], []]
         self._pacman_step_block = []
 
-        self._last_skill_status = self.pacman.get_skills_status()
+        self._last_skill_status = self._pacman.get_skills_status()
         self._last_operation = [pacmanAction, ghostAction]
 
-        pacman_skills = self.pacman.get_skills_status()
-        pacman_coord = self.pacman.get_coord()
-        ghost_coords = [ghost.get_coord() for ghost in self.ghosts]
+        pacman_skills = self._pacman.get_skills_status()
+        pacman_coord = self._pacman.get_coord()
+        ghost_coords = [ghost.get_coord() for ghost in self._ghosts]
 
         # pacman move
         # Note: double_score: 0, speed_up: 1, magnet: 2, shield: 3
         self._pacman_step_block.append(pacman_coord)
         for i in range(3):
             self._ghosts_step_block[i].append(ghost_coords[i])
+            print(self._ghosts_step_block[i])
 
-        if pacman_skills[1] > 0:
+        if pacman_skills[Skill.SPEED_UP.value] > 0:
             if pacmanAction == 0:
-                self.pacman.eat_bean(self.board)
+                self._pacman.eat_bean(self._board)
             elif pacmanAction == 1:  # 向上移动
-                self.pacman.eat_bean(self.board)
-                if self.pacman.up(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.up(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.up(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100 - 1,
+                        self._pacman.get_coord()[1] - 100,
+                    ]
+                )
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.up(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100 - 1,
+                        self._pacman.get_coord()[1] - 100,
+                    ]
+                )
             elif pacmanAction == 2:  # 向左移动
-                self.pacman.eat_bean(self.board)
-                if self.pacman.left(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.left(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.left(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100,
+                        self._pacman.get_coord()[1] - 100 - 1,
+                    ]
+                )
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.left(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100,
+                        self._pacman.get_coord()[1] - 100 - 1,
+                    ]
+                )
             elif pacmanAction == 3:  # 向下移动
-                self.pacman.eat_bean(self.board)
-                if self.pacman.down(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.down(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.down(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100 + 1,
+                        self._pacman.get_coord()[1] - 100,
+                    ]
+                )
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.down(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100 + 1,
+                        self._pacman.get_coord()[1] - 100,
+                    ]
+                )
             elif pacmanAction == 4:  # 向右移动
-                self.pacman.eat_bean(self.board)
-                if self.pacman.right(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
-                if self.pacman.right(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.right(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100,
+                        self._pacman.get_coord()[1] - 100 + 1,
+                    ]
+                )
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.right(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100,
+                        self._pacman.get_coord()[1] - 100 + 1,
+                    ]
+                )
             else:  # 退出程序
                 raise ValueError("Invalid action number of speedy pacman")
         else:
             if pacmanAction == 0:
-                self.pacman.eat_bean(self.board)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(self._pacman.get_coord())
             elif pacmanAction == 1:
-                self.pacman.eat_bean(self.board)
-                if self.pacman.up(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.up(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100 - 1,
+                        self._pacman.get_coord()[1] - 100,
+                    ]
+                )
             elif pacmanAction == 2:
-                self.pacman.eat_bean(self.board)
-                if self.pacman.left(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.left(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100,
+                        self._pacman.get_coord()[1] - 100 - 1,
+                    ]
+                )
             elif pacmanAction == 3:
-                self.pacman.eat_bean(self.board)
-                if self.pacman.down(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.down(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100 + 1,
+                        self._pacman.get_coord()[1] - 100,
+                    ]
+                )
             elif pacmanAction == 4:
-                self.pacman.eat_bean(self.board)
-                if self.pacman.right(self.board):
-                    self._pacman_step_block.append(self.pacman.coord)
+                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(
+                    self._pacman.get_coord()
+                    if self._pacman.right(self._board)
+                    else [
+                        self._pacman.get_coord()[0] - 100,
+                        self._pacman.get_coord()[1] - 100 + 1,
+                    ]
+                )
             else:
                 raise ValueError("Invalid action number of normal pacman")
 
         # ghost move
         for i in range(3):
             if ghostAction[i] == 0:
+                self._ghosts_step_block[i].append(self._ghosts[i].get_coord())
                 pass
             elif ghostAction[i] == 1:
-                self.ghosts[i].up(self.board)
-                self._ghosts_step_block[i].append(self.ghosts[i].coord)
+                self._ghosts_step_block[i].append(
+                    self._ghosts[i].get_coord()
+                    if self._ghosts[i].up(self._board)
+                    else [
+                        self._ghosts[i].get_coord()[0] - 100 - 1,
+                        self._ghosts[i].get_coord()[1] - 100,
+                    ]
+                )
             elif ghostAction[i] == 2:
-                self.ghosts[i].left(self.board)
-                self._ghosts_step_block[i].append(self.ghosts[i].coord)
+                self._ghosts_step_block[i].append(
+                    self._ghosts[i].get_coord()
+                    if self._ghosts[i].left(self._board)
+                    else [
+                        self._ghosts[i].get_coord()[0] - 100,
+                        self._ghosts[i].get_coord()[1] - 100 - 1,
+                    ]
+                )
             elif ghostAction[i] == 3:
-                self.ghosts[i].down(self.board)
-                self._ghosts_step_block[i].append(self.ghosts[i].coord)
+                self._ghosts_step_block[i].append(
+                    self._ghosts[i].get_coord()
+                    if self._ghosts[i].down(self._board)
+                    else [
+                        self._ghosts[i].get_coord()[0] - 100 + 1,
+                        self._ghosts[i].get_coord()[1] - 100,
+                    ]
+                )
             elif ghostAction[i] == 4:
-                self.ghosts[i].right(self.board)
-                self._ghosts_step_block[i].append(self.ghosts[i].coord)
+                self._ghosts_step_block[i].append(
+                    self._ghosts[i].get_coord()
+                    if self._ghosts[i].right(self._board)
+                    else [
+                        self._ghosts[i].get_coord()[0] - 100,
+                        self._ghosts[i].get_coord()[1] - 100 + 1,
+                    ]
+                )
             else:
                 raise ValueError("Invalid action of ghost")
 
         # check if ghosts caught pacman
         # TODO: specialize return value when respawning
         # Note: Original code corresponding wrongly
-        for i in self._pacman_step_block[1:]:
-            for j in self._ghosts_step_block:
-                if i == j[-1]:
-                    if not self.pacman.encounter_ghost():
-                        self.ghosts[i].update_score(DESTORY_PACMAN_SHIELD) # TODO: update_score
-                    else:
-                        self.pacman.update_score(EATEN_BY_GHOST)
-                        self.ghosts[i].update_score(EAT_PACMAN)
-                        self.pacman.set_coord(self.find_distant_emptyspace())
+        flag = False
+        for i in range(3):
+            if opposite_direction(ghostAction[i], pacmanAction):
+                if have_same_element(
+                    self._pacman_step_block, self._ghosts_step_block[i]
+                ):
+                    flag = True
+            else:
+                if self._pacman_step_block[-1] == self._ghosts_step_block[i][-1]:
+                    flag = True
+
+        if flag:
+            if not self._pacman.encounter_ghost():
+                self._ghosts[i].update_score(
+                    DESTORY_PACMAN_SHIELD
+                )  # TODO: update_score
+                self.update_all_score()
+                self._status_code = StatusCode.DESTROY_SHIELD
+            else:
+                self._pacman.update_score(EATEN_BY_GHOST)
+                self._ghosts[i].update_score(EAT_PACMAN)
+                self.update_all_score()
+                self._pacman.set_coord(self.find_distant_emptyspace())
+                # Note: if caught, the respawning coord will be stored at the last position of the list"pacman_step_block"
+                self._pacman_step_block.append(self._pacman.get_coord())
+                self._status_code = StatusCode.CAUGHT
 
         # notice! its a new round
         self._round += 1
-        self.pacman.new_round()
+        self._pacman.new_round()
 
         # check if the game is over
         count_remain_beans = 0
-        for i in range(self.size):
-            for j in range(self.size):
-                if self.board[i][j] == 2 | 3:
+        for i in range(self._size):
+            for j in range(self._size):
+                if self._board[i][j] == 2 | 3:
                     count_remain_beans += 1
         if count_remain_beans == 0:
-            self.pacman.update_score(
-                EAT_ALL_BEANS + (MAX_ROUND[self._level] - self._round) * ROUND_BONUS_GAMMA
+            self._pacman.update_score(
+                EAT_ALL_BEANS
+                + (MAX_ROUND[self._level] - self._round) * ROUND_BONUS_GAMMA
             )
             self.update_all_score()
+            self._status_code = StatusCode.END
             return (
-                self.board,
-                [self.pacman_score, self.ghosts_score],
+                self._board,
+                [self._pacman_score, self._ghosts_score],
                 True,
             )  # true means game over
-        self.update_all_score()
         if self._round >= MAX_ROUND[self._level]:
-            for i in self.ghosts:
+            for i in self._ghosts:
                 i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
-            return self.board, [self.pacman_score, self.ghosts_score], True
+            self.update_all_score()
+            self.status_code = StatusCode.END
+            return self._board, [self._pacman_score, self._ghosts_score], True
 
-        return self.board, [self.pacman_score, self.ghosts_score], False
+        return self._board, [self._pacman_score, self._ghosts_score], False
 
     def get_pacman_score(self):
-        return self.pacman.get_score()
+        return self._pacman.get_score()
 
     def get_ghosts_score(self):
-        ghost_scores = [ghost.score for ghost in self.ghosts]
+        ghost_scores = [ghost.get_score() for ghost in self._ghosts]
         return sum(ghost_scores)
 
     # in case of respawn just beside the ghosts, find a distant empty space
     def find_distant_emptyspace(self):
         coord = []
         max = 0
-        for i in range(self.size):
-            for j in range(self.size):
-                if self.board[i][j] == 1:
+        for i in range(self._size):
+            for j in range(self._size):
+                if self._board[i][j] == Space.EMPTY.value:
                     sum = 0
-                    for i in self.ghosts:
-                        sum += abs(i.coord[0] - i) + abs(i.coord[1] - j)
+                    for i in self._ghosts:
+                        sum += abs(i.get_coord()[0] - i) + abs(i.get_coord()[1] - j)
                     if max > sum:
                         max = sum
                         coord = [i, j]
         if coord == []:
             raise ValueError("No empty space found")
         return coord
-    
+
     def next_level(self):
         self._level += 1
         if self._level > MAX_LEVEL:
             return True
         return False
+
+    def status(self):
+        return self._status_code

@@ -1,5 +1,4 @@
-# Note: double_score: 0, speed_up: 1, magnet: 2
-DEFAULT_SKILL_TIME = [10, 10, 10]
+from .gamedata import *
 
 
 class Pacman:
@@ -15,39 +14,39 @@ class Pacman:
         y=-1,
     ):
         self.id = id  # FIXME: how should it be used?
-        self.score = score
-        self.skill_status = [double_score, speed_up, magnet, shield]
-        self.coord = [x, y]
+        self._score = score
+        self._skill_status = [double_score, speed_up, magnet, shield]
+        self._coord = [x, y]
 
     def update_score(self, points):
-        if self.skill_status[0] == 0:
-            self.score += points 
+        if self._skill_status[Skill.DOUBLE_SCORE.value] == 0:
+            self._score += points
         else:
-            self.score += points * 2
+            self._score += points * 2
 
     def just_eat(self, board, x, y):
-        if board[x][y] == 2:
+        if board[x][y] == Space.REGULAR_BEAN.value:
             self.update_score(1)
-            board[x][y] = 1
-        elif board[x][y] == 3:
+            board[x][y] = Space.EMPTY.value
+        elif board[x][y] == Space.DOUBLE_BEAN.value:
             self.update_score(2)
+            board[x][y] = Space.EMPTY.value
+        elif board[x][y] == Space.SPEED_BEAN.value:
+            self.acquire_skill(Skill.SPEED_UP)
+            board[x][y] = Space.EMPTY.value
+        elif board[x][y] == Space.MAGNET_BEAN.value:
+            self.acquire_skill(Skill.MAGNET)
+            board[x][y] = Space.EMPTY.value
+        elif board[x][y] == Space.SHIELD_BEAN.value:
+            self.acquire_skill(Skill.SHIELD)
             board[x][y] = 1
-        elif board[x][y] == 4:
-            self.acquire_skill(1)
-            board[x][y] = 1
-        elif board[x][y] == 5:
-            self.acquire_skill(2)
-            board[x][y] = 1
-        elif board[x][y] == 6:
-            self.acquire_skill(3)
-            board[x][y] = 1
-        elif board[x][y] == 7:
-            self.acquire_skill(0)
+        elif board[x][y] == Space.DOUBLE_BEAN.value:
+            self.acquire_skill(Skill.DOUBLE_SCORE)
             board[x][y] = 1
 
     def eat_bean(self, board):
-        x, y = self.coord
-        if self.skill_status[2] == 0:
+        x, y = self._coord
+        if self._skill_status[Skill.MAGNET.value] == 0:
             self.just_eat(board, x, y)
 
         else:
@@ -64,61 +63,64 @@ class Pacman:
     # 判断pacman是否撞墙，是否与ghost相遇的部分应该放在main函数中实现
 
     def get_coord(self):
-        return self.coord
+        return self._coord.copy()
 
     def set_coord(self, coord):
-        self.coord = coord
+        self._coord = coord
 
     def get_skills_status(self):
-        return self.skill_status
+        return self._skill_status.copy()
 
-    def acquire_skill(self, skill_index: int):
-        if skill_index > 2:
-            raise ValueError("Invalid skill index")
-        self.skill_status[skill_index] = DEFAULT_SKILL_TIME[skill_index]
+    def acquire_skill(self, skill_index: Skill):
+        if skill_index == Skill.SHIELD:
+            self._skill_status[Skill.SHIELD.value] += 1
+        else:
+            self._skill_status[skill_index.value] = DEFAULT_SKILL_TIME[skill_index.value]
 
-    def new_round(self): # Note: reset the skill status when a new round starts
-        if self.skill_status[0] > 0:
-            self.skill_status[0] -= 1
-        if self.skill_status[1] > 0:
-            self.skill_status[1] -= 1
-        if self.skill_status[2] > 0:
-            self.skill_status[2] -= 1
+    def new_round(self):  # Note: reset the skill status when a new round starts
+        if self._skill_status[Skill.DOUBLE_SCORE.value] > 0:
+            self._skill_status[Skill.DOUBLE_SCORE.value] -= 1
+        if self._skill_status[Skill.MAGNET.value] > 0:
+            self._skill_status[Skill.MAGNET.value] -= 1
+        if self._skill_status[Skill.SPEED_UP.value] > 0:
+            self._skill_status[Skill.SPEED_UP.value] -= 1
+            
+            
 
     def get_score(self):
-        return self.score
+        return self._score
 
     def encounter_ghost(self):
-        if self.skill_status[3] > 0:
-            self.skill_status[3] -= 1
+        if self._skill_status[Skill.SHIELD.value] > 0:
+            self._skill_status[Skill.SHIELD.value] -= 1
             return False
         else:
             return True
 
     def up(self, board):
-        if board[self.coord[0] - 1][self.coord[1]] != 0:
-            self.coord[0] -= 1
+        if board[self._coord[0] - 1][self._coord[1]] != Space.WALL.value:
+            self._coord[0] -= 1
             return True
         else:
             return False
 
     def down(self, board):
-        if board[self.coord[0] + 1][self.coord[1]] != 0:
-            self.coord[0] += 1
+        if board[self._coord[0] + 1][self._coord[1]] != Space.WALL.value:
+            self._coord[0] += 1
             return True
         else:
             return False
 
     def left(self, board):
-        if board[self.coord[0]][self.coord[1] - 1] != 0:
-            self.coord[1] -= 1
+        if board[self._coord[0]][self._coord[1] - 1] != Space.WALL.value:
+            self._coord[1] -= 1
             return True
         else:
             return False
 
     def right(self, board):
-        if board[self.coord[0]][self.coord[1] + 1] != 0:
-            self.coord[1] += 1
+        if board[self._coord[0]][self._coord[1] + 1] != Space.WALL.value:
+            self._coord[1] += 1
             return True
         else:
             return False

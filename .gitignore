@@ -1,11 +1,5 @@
-agent_test/*
-agent_test
-PacMan/*
-PacMan
-replay/*
-replay
+agent_test/
+PacMan/
+replay/
 .DS_Store
-core/__pycache__/*
-core/__pycache__
-logic/__pycache__/*
-logic/__pycache__
+**/__pycache__/
