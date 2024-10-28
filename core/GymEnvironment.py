@@ -86,8 +86,7 @@ class PacmanEnv(gym.Env):
                         continue
                     if [i, j] in [ghost.get_coord() for ghost in self._ghosts]:
                         print("\033[1;40m  \033[0m", end="")
-                        continue
-                    
+                        continue    
                     if self._board[i][j] == 0:
                         print("\033[1;41m  \033[0m", end="")  # 墙：红
                     elif self._board[i][j] == 1:
@@ -178,7 +177,7 @@ class PacmanEnv(gym.Env):
         self._pacman_score = self.get_pacman_score()
         self._ghosts_score = self.get_ghosts_score()
 
-    # Note: 如果撞墙(x,y), step(x-100, y-100)
+    # Note: 如果pacman撞墙(x,y), step(x-100, y-100); 如果ghost撞墙(x,y), step(x-200, y-200)
     def step(self, pacmanAction: int, ghostAction: List[int]):
 
         self._last_operation = []
@@ -197,7 +196,7 @@ class PacmanEnv(gym.Env):
         self._pacman_step_block.append(pacman_coord)
         for i in range(3):
             self._ghosts_step_block[i].append(ghost_coords[i])
-            print(self._ghosts_step_block[i])
+            # print(self._ghosts_step_block[i])
 
         if pacman_skills[Skill.SPEED_UP.value] > 0:
             if pacmanAction == 0:
@@ -322,7 +321,7 @@ class PacmanEnv(gym.Env):
                 )
             else:
                 raise ValueError("Invalid action number of normal pacman")
-
+        self.update_all_score()
         # ghost move
         for i in range(3):
             if ghostAction[i] == 0:
@@ -366,7 +365,7 @@ class PacmanEnv(gym.Env):
                 )
             else:
                 raise ValueError("Invalid action of ghost")
-
+        self.update_all_score()
         # check if ghosts caught pacman
         # TODO: specialize return value when respawning
         # Note: Original code corresponding wrongly
@@ -413,6 +412,7 @@ class PacmanEnv(gym.Env):
                 + (MAX_ROUND[self._level] - self._round) * ROUND_BONUS_GAMMA
             )
             self.update_all_score()
+            self._pacman.reset()
             self._status_code = StatusCode.END
             return (
                 self._board,
@@ -423,6 +423,7 @@ class PacmanEnv(gym.Env):
             for i in self._ghosts:
                 i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
             self.update_all_score()
+            self._pacman.reset()
             self.status_code = StatusCode.END
             return self._board, [self._pacman_score, self._ghosts_score], True
 

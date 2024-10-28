@@ -124,3 +124,7 @@ class Pacman:
             return True
         else:
             return False
+        
+        
+    def reset(self):
+        self._skill_status = [0, 0, 0, 0]

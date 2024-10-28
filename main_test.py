@@ -38,7 +38,7 @@ def get_ai_info( player , player_type , another_player_type ):
         # 回放文件写入结束信息
         replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
 
-        if player_type == 2:
+        '''if player_type == 2:
             send_to_judger(
                 json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), player
             )
@@ -46,7 +46,7 @@ def get_ai_info( player , player_type , another_player_type ):
         if another_player_type == 2:
             send_to_judger(
                 json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), 1 - player
-            )
+            )'''
 
         end_list = ["OK", "OK"]
         end_list[json.loads(ai_info["content"])["player"]] = ERROR_MAP[
@@ -56,7 +56,7 @@ def get_ai_info( player , player_type , another_player_type ):
             "0": json.loads(ai_info["content"])["player"],
             "1": 1 - json.loads(ai_info["content"])["player"],
         }
-        send_game_end_info(json.dumps(end_info), json.dumps(end_list))
+        '''send_game_end_info(json.dumps(end_info), json.dumps(end_list))'''
         replay_file.close()
         time.sleep(0.5)
         exit(0)
@@ -92,7 +92,7 @@ def get_ai_info( player , player_type , another_player_type ):
             # 回放文件写入结束信息
             replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
 
-            if player_type == 2:
+            '''if player_type == 2:
                 send_to_judger(
                     json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), player
                 )
@@ -101,13 +101,13 @@ def get_ai_info( player , player_type , another_player_type ):
                 send_to_judger(
                     json.dumps(return_dict, ensure_ascii=False).encode("utf-8"),
                     1 - player,
-                )
+                )'''
 
             end_state = ["OK", "OK"]
             end_state[player] = "IA"
-            send_game_end_info(
+            '''send_game_end_info(
                 json.dumps({"0": player, "1": 1 - player}), json.dumps(end_state)
-            )
+            )'''
             replay_file.close()
             time.sleep(0.5)
             exit(0)
@@ -139,12 +139,12 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     new_state = env.render()
     replay_file.write(json.dumps(new_state, ensure_ascii=False) + "\n")
 
-    if pacman_type == 2:
+    '''if pacman_type == 2:
         send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), 0)
 
     if ghost_type == 2:
         send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), 1)
-    
+    '''
     game_continue = True
     # 返回新的状态信息
     if new_state['level'] != MAX_LEVEL or env.check_round_end() == False:
@@ -206,7 +206,7 @@ if __name__ == "__main__":
             end_json = json.dumps(end_dict, ensure_ascii=False)
             replay_file.write(end_json + "\n")
 
-            if player_type[1] == 2:
+            '''if player_type[1] == 2:
                 send_to_judger(json.dumps(end_dict), 1)
 
             if player_type[0] == 2:
@@ -220,7 +220,7 @@ if __name__ == "__main__":
                 "0": 1 if player_type[0] else 0,
                 "1": 1 if player_type[1] else 0,
             }
-            send_game_end_info(json.dumps(end_info), end_state)
+            send_game_end_info(json.dumps(end_info), end_state)'''
             replay_file.close()
             time.sleep(1)
             exit(0)
@@ -246,7 +246,7 @@ if __name__ == "__main__":
             # 接受吃豆人的消息和幽灵的消息
             for i in range(2) :
                 state += 1
-                if player_type[players[i]] == 1:
+                '''if player_type[players[i]] == 1:
                     send_round_config(MAX_AI_TIME, MAX_LENGTH)
                 elif player_type[players[1-i]] == 2:
                     send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
@@ -270,26 +270,29 @@ if __name__ == "__main__":
                             str(init_json) if player_type[1] == 1 else init_json,
                         ],
                     )
-                    print( init_json )
+                    print( init_json )'''
 
                 if i == 0:
                     pacman_action = int(input())
-                    print( pacman_action )
+                    # print( pacman_action )
                 else:
-                    ghost_action = [float(num) for num in input().split()]
+                    ghost_action = [int(num) for num in input().split()]
                     print( ghost_action )
+                    
+                print("pacman score: ", env._pacman_score)
+                print("ghost score: ", env._ghosts_score)
             
             # 调用step
             state += 1
             game_continue , info1 , info2 , level_change = interact(
                 env, pacman_action, players[0], ghost_action, players[1], player_type[players[0]], player_type[players[1]]
             )
-            send_round_info(
+            '''send_round_info(
                 state,
                 [players[i]],
                 [players[i],players[1-i]],
                 [info1,info2],
-            )
+            )'''
         end_state = json.dumps(
             ["OK", "OK"]
         )
@@ -305,14 +308,16 @@ if __name__ == "__main__":
             "score_pacman": pacmanscore,
             "score_ghost": ghostscore,
         }
-
-        if player_type[0] == 2:
+        
+        
+        '''if player_type[0] == 2:
             send_to_judger(json.dumps(end_json, ensure_ascii=False).encode("utf-8"), 0)
         if player_type[1] == 2:
-            send_to_judger(json.dumps(end_json, ensure_ascii=False).encode("utf-8"), 1)
-
+            send_to_judger(json.dumps(end_json, ensure_ascii=False).encode("utf-8"), 1)'''
+        
+        
         replay_file.write(json.dumps(end_json, ensure_ascii=False) + "\n")
-        send_game_end_info(json.dumps(end_info), end_state)
+        '''send_game_end_info(json.dumps(end_info), end_state)'''
         replay_file.close()
         time.sleep(1)
         exit(0)
