@@ -108,9 +108,11 @@ class PacmanEnv(gym.Env):
 
         elif mode == "logic":  # 返回一个字典
             return_dict = {
-                "player": self._player,
+                "pacman_player": self._player, # ???
                 "ghosts_step_block": self._ghosts_step_block,
+                "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
                 "pacman_step_block": self._pacman_step_block,
+                "pacman_coord": self._pacman.get_coord(),
                 "pacman_skills": self._last_skill_status,
                 # Note: 播放器需要根据是否有magnet属性确定每次移动的时候需要如何吸取豆子
                 "round": self._round,
