@@ -26,23 +26,29 @@ class Pacman:
 
     def just_eat(self, board, x, y):
         if board[x][y] == Space.REGULAR_BEAN.value:
+            board[x][y] = Space.EMPTY.value
             self.update_score(1)
-            board[x][y] = Space.EMPTY.value
+            
         elif board[x][y] == Space.DOUBLE_BEAN.value:
+            board[x][y] = Space.EMPTY.value
             self.update_score(2)
-            board[x][y] = Space.EMPTY.value
+
         elif board[x][y] == Space.SPEED_BEAN.value:
+            board[x][y] = Space.EMPTY.value
             self.acquire_skill(Skill.SPEED_UP)
-            board[x][y] = Space.EMPTY.value
+            
         elif board[x][y] == Space.MAGNET_BEAN.value:
-            self.acquire_skill(Skill.MAGNET)
             board[x][y] = Space.EMPTY.value
+            self.acquire_skill(Skill.MAGNET)
+
         elif board[x][y] == Space.SHIELD_BEAN.value:
+            board[x][y] = Space.EMPTY.value
             self.acquire_skill(Skill.SHIELD)
-            board[x][y] = 1
+
         elif board[x][y] == Space.DOUBLE_BEAN.value:
+            board[x][y] = Space.EMPTY.value
             self.acquire_skill(Skill.DOUBLE_SCORE)
-            board[x][y] = 1
+            
 
     def eat_bean(self, board):
         x, y = self._coord

@@ -162,6 +162,16 @@ class PacmanEnv(gym.Env):
         self._round = 0
 
         self._status_code = StatusCode.NORMAL
+        
+        return_dict = {
+                "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
+                "pacman_coord": self._pacman.get_coord(),
+                "score": [self._pacman_score, self._ghosts_score],
+                "level": self._level,
+                "board": self._board,
+                "status": self._status_code.value,
+            }
+        return return_dict
 
     # step utils
     def check_round_end(self):
