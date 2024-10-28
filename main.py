@@ -264,14 +264,14 @@ if __name__ == "__main__":
                         ],
                     )
 
-                players[i].role , players[i].action = get_ai_info(players[i],players[i].type,players[1-i].type)
+                players[i].role , players[i].action = get_ai_info(players[i].id,players[i].type,players[1-i].type)
             
             # 调用step
             state += 1
             if players[0].role == 0 :
                 # 0号玩家是吃豆人
                 game_continue , info1 , info2 , level_change = interact(
-                    env, players[0].action, players[0], players[1].action, players[1], players[0].type, players[1].type
+                    env, players[0].action, players[0].id, players[1].action, players[1].id, players[0].type, players[1].type
                 )
                 send_round_info(
                     state,
@@ -282,7 +282,7 @@ if __name__ == "__main__":
             else :
                 # 1号玩家是吃豆人
                 game_continue , info1 , info2 , level_change = interact(
-                    env, players[1].action, players[1], players[0].action, players[1], players[1].type, players[0].type
+                    env, players[1].action, players[1].id, players[0].action, players[1].id, players[1].type, players[0].type
                 )
                 send_round_info(
                     state,
