@@ -66,6 +66,8 @@ def get_ai_info( player , player_type , another_player_type , ai_info ):
     else:
         try:
             # 获取操作
+            print( "infoooooooo" )
+            print( ai_info)
             info = json.loads(ai_info["content"])
             role = info["role"]
             action = [int(i) for i in info["action"].split(" ")]
@@ -129,6 +131,9 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     '''
     # 执行两个玩家的操作
     try:
+        print( "debugggggggggggg" )
+        print( pacman_action )
+        print( ghost_action )
         board , score , level_change = env.step(pacman_action[0], ghost_action)
     except:
         error = traceback.format_exc()
@@ -183,6 +188,8 @@ ai_info2 = {
 }
 
 ai_infoo = [ai_info1,ai_info2]
+
+import numpy as np
 
 if __name__ == "__main__":
     import traceback
@@ -247,8 +254,7 @@ if __name__ == "__main__":
         while game_continue:
             # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
             if level_change == 1:
-                env.reset()
-                init_json = json.dumps(env.render(), ensure_ascii=False)
+                init_json = json.dumps(env.reset(), ensure_ascii=False)
                 env.render("local")
                 replay_file.write(init_json+'\n')
 
@@ -283,28 +289,42 @@ if __name__ == "__main__":
                         ],
                     )
                     print( init_json )'''
-
-                if i == 0:
-                    pacman_action = int(input())
-                    # print( pacman_action )
-                else:
-                    ghost_action = [int(num) for num in input().split()]
-                    print( ghost_action )
+                action = input()
+                ai_infoo[i]["content"] = json.dumps(
+                    {
+                        "role": i,
+                        "action": action
+                    }
+                )
+                players[i].role , players[i].action = get_ai_info(players[i].id,players[i].type,players[1-i].type,ai_infoo[i])
                     
                 print("pacman score: ", env._pacman_score)
                 print("ghost score: ", env._ghosts_score)
             
             # 调用step
             state += 1
-            game_continue , info1 , info2 , level_change = interact(
-                env, pacman_action, players[0], ghost_action, players[1], player_type[players[0]], player_type[players[1]]
-            )
-            '''send_round_info(
-                state,
-                [players[i]],
-                [players[i],players[1-i]],
-                [info1,info2],
-            )'''
+            if players[0].role == 0 :
+                # 0号玩家是吃豆人
+                game_continue , info1 , info2 , level_change = interact(
+                    env, players[0].action, players[0].id, players[1].action, players[1].id, players[0].type, players[1].type
+                )
+                # send_round_info(
+                #     state,
+                #     [],
+                #     [players[0].type,players[1].type],
+                #     [info1,info2],
+                # )
+            else :
+                # 1号玩家是吃豆人
+                game_continue , info1 , info2 , level_change = interact(
+                    env, players[1].action, players[1].id, players[0].action, players[1].id, players[1].type, players[0].type
+                )
+                # send_round_info(
+                #     state,
+                #     [],
+                #     [players[1].type,players[0].type],
+                #     [info1,info2],
+                # )
         end_state = json.dumps(
             ["OK", "OK"]
         )
