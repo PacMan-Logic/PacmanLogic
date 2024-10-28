@@ -103,7 +103,7 @@ class PacmanEnv(gym.Env):
                     elif self._board[i][j] == 6:
                         print("\033[1;46m  \033[0m", end="")  # 护盾豆子：青
                     elif self._board[i][j] == 7:
-                        print("\033[1;48m  \033[0m", end="")  # *2豆子：灰
+                        print("\033[1;48;5;208m  \033[0m", end="")   # *2豆子：橘
                 print()
 
         elif mode == "logic":  # 返回一个字典

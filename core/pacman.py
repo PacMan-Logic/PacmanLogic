@@ -29,7 +29,7 @@ class Pacman:
             board[x][y] = Space.EMPTY.value
             self.update_score(1)
             
-        elif board[x][y] == Space.DOUBLE_BEAN.value:
+        elif board[x][y] == Space.BONUS_BEAN.value:
             board[x][y] = Space.EMPTY.value
             self.update_score(2)
 
