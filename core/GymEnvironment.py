@@ -102,14 +102,16 @@ class PacmanEnv(gym.Env):
                     elif self._board[i][j] == 6:
                         print("\033[1;46m  \033[0m", end="")  # 护盾豆子：青
                     elif self._board[i][j] == 7:
-                        print("\033[1;48m  \033[0m", end="")  # *2豆子：灰
+                        print("\033[1;48;5;208m  \033[0m", end="")   # *2豆子：橘
                 print()
 
         elif mode == "logic":  # 返回一个字典
             return_dict = {
-                "player": self._player,
+                "pacman_player": self._player, # ???
                 "ghosts_step_block": self._ghosts_step_block,
+                "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
                 "pacman_step_block": self._pacman_step_block,
+                "pacman_coord": self._pacman.get_coord(),
                 "pacman_skills": self._last_skill_status,
                 # Note: 播放器需要根据是否有magnet属性确定每次移动的时候需要如何吸取豆子
                 "round": self._round,
@@ -159,6 +161,16 @@ class PacmanEnv(gym.Env):
         self._round = 0
 
         self._status_code = StatusCode.NORMAL
+        
+        return_dict = {
+                "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
+                "pacman_coord": self._pacman.get_coord(),
+                "score": [self._pacman_score, self._ghosts_score],
+                "level": self._level,
+                "board": self._board,
+                "status": self._status_code.value,
+            }
+        return return_dict
 
     # step utils
     def check_round_end(self):

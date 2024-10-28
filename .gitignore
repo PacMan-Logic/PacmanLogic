@@ -1,5 +1,10 @@
-agent_test/
-PacMan/
-replay/
+agent_test
+PacMan/*
+PacMan
+replay/*
+replay
 .DS_Store
 **/__pycache__/
+
+ai_pacman.py
+ai_ghosts.py

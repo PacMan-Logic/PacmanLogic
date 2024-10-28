@@ -84,8 +84,8 @@ def receive_ai_end_state():
 
 
 # 逻辑向judger发送游戏结束信息
-def send_game_end_info(end_info, end_score):
-    game_end_info = {"state": -1, "end_info": end_info, "end_state": end_score}
+def send_game_end_info(end_info, end_state):
+    game_end_info = {"state": -1, "end_info": end_info, "end_state": end_state}
     game_end_info_bytes = json.dumps(game_end_info).encode("utf-8")
     send_to_judger(game_end_info_bytes)
 
