@@ -14,16 +14,17 @@ from .gamedata import *
 import os
 
 
-def opposite_direction(x, y):
+def opposite_direction(x, y): # dont need this now
     if x == 0 or y == 0:
         return True
     if (x == 1 and y == 3) or (x == 3 and y == 1):
         return True
     if (x == 2 and y == 4) or (x == 4 and y == 2):
         return True
+    return False
 
 
-def have_same_element(a, b):
+def have_same_element(a, b): # dont need this now
     for i in a:
         if i in b:
             return True
@@ -200,7 +201,7 @@ class PacmanEnv(gym.Env):
         self._last_skill_status = self._pacman.get_skills_status()
         self._last_operation = [pacmanAction, ghostAction]
 
-        pacman_skills = self._pacman.get_skills_status()
+        
         pacman_coord = self._pacman.get_coord()
         ghost_coords = [ghost.get_coord() for ghost in self._ghosts]
 
@@ -211,11 +212,12 @@ class PacmanEnv(gym.Env):
             self._ghosts_step_block[i].append(ghost_coords[i])
             print(self._ghosts_step_block[i])
 
+        self._pacman.eat_bean(self._board) # 吃掉此处的豆子
+        pacman_skills = self._pacman.get_skills_status() # 更新状态
         if pacman_skills[Skill.SPEED_UP.value] > 0:
             if pacmanAction == 0:
-                self._pacman.eat_bean(self._board)
+                self._pacman_step_block.append(self._pacman.get_coord())
             elif pacmanAction == 1:  # 向上移动
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.up(self._board)
@@ -224,6 +226,7 @@ class PacmanEnv(gym.Env):
                         self._pacman.get_coord()[1] - 100,
                     ]
                 )
+                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.up(self._board)
@@ -233,7 +236,6 @@ class PacmanEnv(gym.Env):
                     ]
                 )
             elif pacmanAction == 2:  # 向左移动
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.left(self._board)
@@ -242,6 +244,7 @@ class PacmanEnv(gym.Env):
                         self._pacman.get_coord()[1] - 100 - 1,
                     ]
                 )
+                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.left(self._board)
@@ -251,7 +254,6 @@ class PacmanEnv(gym.Env):
                     ]
                 )
             elif pacmanAction == 3:  # 向下移动
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.down(self._board)
@@ -260,6 +262,7 @@ class PacmanEnv(gym.Env):
                         self._pacman.get_coord()[1] - 100,
                     ]
                 )
+                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.down(self._board)
@@ -269,7 +272,6 @@ class PacmanEnv(gym.Env):
                     ]
                 )
             elif pacmanAction == 4:  # 向右移动
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.right(self._board)
@@ -278,6 +280,7 @@ class PacmanEnv(gym.Env):
                         self._pacman.get_coord()[1] - 100 + 1,
                     ]
                 )
+                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.right(self._board)
@@ -290,10 +293,8 @@ class PacmanEnv(gym.Env):
                 raise ValueError("Invalid action number of speedy pacman")
         else:
             if pacmanAction == 0:
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(self._pacman.get_coord())
             elif pacmanAction == 1:
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.up(self._board)
@@ -303,7 +304,6 @@ class PacmanEnv(gym.Env):
                     ]
                 )
             elif pacmanAction == 2:
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.left(self._board)
@@ -313,7 +313,6 @@ class PacmanEnv(gym.Env):
                     ]
                 )
             elif pacmanAction == 3:
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.down(self._board)
@@ -323,7 +322,6 @@ class PacmanEnv(gym.Env):
                     ]
                 )
             elif pacmanAction == 4:
-                self._pacman.eat_bean(self._board)
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.right(self._board)
@@ -384,14 +382,11 @@ class PacmanEnv(gym.Env):
         # Note: Original code corresponding wrongly
         flag = False
         for i in range(3):
-            if opposite_direction(ghostAction[i], pacmanAction):
-                if have_same_element(
-                    self._pacman_step_block, self._ghosts_step_block[i]
-                ):
+            if pacman_skills[Skill.SPEED_UP.value] > 0:
+                if self._pacman_step_block[-2] == self._ghosts_step_block[i][-1]:
                     flag = True
-            else:
-                if self._pacman_step_block[-1] == self._ghosts_step_block[i][-1]:
-                    flag = True
+            if self._pacman_step_block[-1] == self._ghosts_step_block[i][-1]:
+                flag = True
 
         if flag:
             if not self._pacman.encounter_ghost():
