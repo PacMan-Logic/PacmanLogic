@@ -228,6 +228,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
+                pacman_skills = self._pacman.get_skills_status() # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.up(self._board)
@@ -246,6 +247,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
+                pacman_skills = self._pacman.get_skills_status() # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.left(self._board)
@@ -264,6 +266,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
+                pacman_skills = self._pacman.get_skills_status() # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.down(self._board)
@@ -282,6 +285,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
+                pacman_skills = self._pacman.get_skills_status() # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.right(self._board)
