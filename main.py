@@ -149,8 +149,8 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     interact返回四个值: game_continue, info1, info2, level_change  info1和info2分别发给吃豆人和幽灵
     '''
     # 执行两个玩家的操作
+    quit_running()
     try:
-        quit_running()
         board , score , level_change = env.step(pacman.action[0], ghosts.action)
     except:
         error = traceback.format_exc()
