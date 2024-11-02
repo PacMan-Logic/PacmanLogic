@@ -151,6 +151,7 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     # 执行两个玩家的操作
     try:
         board , score , level_change = env.step(pacman.action[0], ghosts.action)
+        quit_running()
     except:
         error = traceback.format_exc()
         return_dict = env.render()
@@ -192,7 +193,6 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     # 更新游戏状态
     new_state = env.render()
     replay_file.write(json.dumps(new_state, ensure_ascii=False) + "\n")
-    quit_running()
     if pacman.type == 2:
         send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), pacman.id)
 
