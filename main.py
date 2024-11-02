@@ -29,8 +29,6 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
     获取ai或播放器用户的操作: 玩家1和玩家2的类型: 1 为 AI, 2 为网页播放器。
     '''
     ai_info = receive_ai_info()
-    #debug
-    replay_file.write(json.dumps(ai_info, ensure_ascii=False)+"\n")
 
     while ai_info["player"] != -1 and ai_info["player"] != playerid:
         ai_info = receive_ai_info()
