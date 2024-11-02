@@ -173,7 +173,9 @@ class PacmanEnv(gym.Env):
             "status": 1,
         }
         return return_dict
-
+    
+    def get_level(self):
+        return self._level
     # step utils
     def check_round_end(self):
         return self._round >= MAX_ROUND[self._level]

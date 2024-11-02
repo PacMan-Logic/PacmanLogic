@@ -268,6 +268,8 @@ if __name__ == "__main__":
         while game_continue:
             # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
             if level_change == 1:
+                if env.get_level() == 3 :
+                    break
                 init_json = json.dumps(env.reset(), ensure_ascii=False)
                 replay_file.write(init_json+'\n')
 
