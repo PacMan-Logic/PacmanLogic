@@ -87,15 +87,15 @@ def upload():
             exit(1)
 
         # 获取用户名
-        # username = requests.get(f"{api_base}profile", headers=headers).json()["user"][
-        #     "username"
-        # ]
-        # if args.logic:
-        #     if username != "admin":
-        #         print(f"错误：逻辑代码只能由管理员上传。")
-        #         exit(1)
-        #     else:
-        #         args.name = "Logic Entity"
+        username = requests.get(f"{api_base}profile", headers=headers).json()["user"][
+            "username"
+        ]
+        if args.logic:
+            if username != "admin":
+                print(f"错误：逻辑代码只能由管理员上传。")
+                exit(1)
+            else:
+                args.name = "Logic Entity"
 
         # 查找 AI
         entities = requests.get(
