@@ -304,7 +304,7 @@ if __name__ == "__main__":
                     )
 
                 players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
-                quit_running()
+                
             # 调用step
             state += 1
             send_round_config(MAX_AI_TIME, MAX_LENGTH)
@@ -320,6 +320,7 @@ if __name__ == "__main__":
                     [players[0].id,players[1].id],
                     [info1,info2],
                 )
+                quit_running()
                 
             else :
                 # 1号玩家是吃豆人
@@ -332,6 +333,7 @@ if __name__ == "__main__":
                     [players[1].id,players[0].id],
                     [info1,info2],
                 )
+                quit_running()
             
         end_state = json.dumps(
             ["OK", "OK"]
