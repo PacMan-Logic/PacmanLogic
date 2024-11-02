@@ -77,14 +77,16 @@ def upload():
                     f.write(p)
 
         # 查找游戏
-        games = requests.get(f"{api_base}games/").json()
-        for game in games:
-            if game["name"] == args.game:
-                game_id = game["id"]
-                break
-        else:
-            print(f"错误：游戏 {args.game} 未找到！")
-            exit(1)
+        # games = requests.get(f"{api_base}games/").json()
+        # for game in games:
+        #     if game["name"] == args.game:
+        #         game_id = game["id"]
+        #         break
+        # else:
+        #     print(f"错误：游戏 {args.game} 未找到！")
+        #     exit(1)
+
+        game_id = 42
 
         # 获取用户名
         username = requests.get(f"{api_base}profile", headers=headers).json()["user"][
