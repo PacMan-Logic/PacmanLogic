@@ -176,7 +176,7 @@ class PacmanEnv(gym.Env):
 
     # step utils
     def check_round_end(self):
-        return self._round >= MAX_ROUND[self._level]
+        return self._round >= MAX_ROUND[self._level-1]
 
     def get_action(self, action):
         assert len(action) == 4
@@ -431,7 +431,7 @@ class PacmanEnv(gym.Env):
                 [self._pacman_score, self._ghosts_score],
                 True,
             )  # true means game over
-        if self._round >= MAX_ROUND[self._level]:
+        if self._round >= MAX_ROUND[self._level-1]:
             for i in self._ghosts:
                 i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
             self.update_all_score()
