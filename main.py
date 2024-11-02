@@ -150,8 +150,8 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     '''
     # 执行两个玩家的操作
     try:
-        board , score , level_change = env.step(pacman.action[0], ghosts.action)
         quit_running()
+        board , score , level_change = env.step(pacman.action[0], ghosts.action)
     except:
         error = traceback.format_exc()
         return_dict = env.render()
