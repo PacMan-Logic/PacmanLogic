@@ -283,16 +283,13 @@ if __name__ == "__main__":
                     send_round_config(MAX_AI_TIME, MAX_LENGTH)
                 elif players[1-i].type == 2:
                     send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
-                
-                if i == 1 :
-                    quit_running()
 
                 # level发生改变时将初始化信息发给ai，未改变时发送空串
                 if level_change == 0:
                     send_round_info(
                         state,
                         [players[i].id],
-                        [players[i].id,players[1-i].id],
+                        [],
                         [],
                     )
                     
