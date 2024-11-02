@@ -292,6 +292,8 @@ if __name__ == "__main__":
                         [players[i].id,players[1-i].id],
                         [],
                     )
+                    if i == 1 :
+                        quit_running()
                     
                 else:
                     level_change = 0
@@ -303,7 +305,6 @@ if __name__ == "__main__":
                     )
 
                 players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
-                quit_running()
                 
             # 调用step
             state += 1
