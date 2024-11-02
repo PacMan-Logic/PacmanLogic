@@ -108,7 +108,6 @@ class PacmanEnv(gym.Env):
 
         elif mode == "logic":  # 返回一个字典
             return_dict = {
-                "pacman_player": self._player, # ???
                 "ghosts_step_block": self._ghosts_step_block,
                 "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
                 "pacman_step_block": self._pacman_step_block,
@@ -171,7 +170,7 @@ class PacmanEnv(gym.Env):
             "score": [self._pacman_score, self._ghosts_score],
             "level": self._level,
             "board": return_board,
-            "status": self._status_code.value,
+            "status": 1,
         }
         return return_dict
 

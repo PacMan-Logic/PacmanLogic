@@ -15,12 +15,22 @@
     "action": "action1 action2 action3"
 }
 ```
-action 为 0/1/2/3/4 表示 不动/上/下/左/右
+action 为 0/1/2/3/4 表示 不动/上/左/下/右
 
 ## 逻辑->用户
 三个阶段
 
 阶段一：读入吃豆人发的消息，如果有棋盘更新会发送info
+```py
+{
+    "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
+    "pacman_coord": self._pacman.get_coord(),
+    "score": [self._pacman_score, self._ghosts_score],
+    "level": self._level,
+    "board": return_board, # 二维数组，棋盘 
+    "status": 1,
+}
+```
 
 阶段二：读入幽灵发的消息
 
@@ -40,6 +50,6 @@ action 为 0/1/2/3/4 表示 不动/上/下/左/右
     "score": [self._pacman_score, self._ghosts_score], # 吃豆人、幽灵分数
     "level": self._level, # 关卡数
     "StopReason": None,
-    "status": self._status_code.value,
+    "status": self._status_code.value, # 是否切换新的关卡
 }
 ```

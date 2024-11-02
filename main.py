@@ -24,12 +24,15 @@ class Player():
 
 # FIXME: 在reset的时候随机幽灵和吃豆人的位置，这个处于创建环境之后、开始游戏之前
 
-def get_ai_info( player , player_type , another_player_type ):
+def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type ):
     '''
     获取ai或播放器用户的操作: 玩家1和玩家2的类型: 1 为 AI, 2 为网页播放器。
     '''
     ai_info = receive_ai_info()
-    while ai_info["player"] != -1 and ai_info["player"] != player:
+    #debug
+    replay_file.write(json.dumps(ai_info, ensure_ascii=False)+"\n")
+
+    while ai_info["player"] != -1 and ai_info["player"] != playerid:
         ai_info = receive_ai_info()
     # 判定交互对象状态
     # 如果交互对象异常则退出
@@ -46,22 +49,31 @@ def get_ai_info( player , player_type , another_player_type ):
 
         if player_type == 2:
             send_to_judger(
-                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), player
+                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), playerid
             )
 
         if another_player_type == 2:
             send_to_judger(
-                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), 1 - player
+                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), 1 - playerid
             )
 
         end_list = ["OK", "OK"]
         end_list[json.loads(ai_info["content"])["player"]] = ERROR_MAP[
             json.loads(ai_info["content"])["error"]
         ]
-        end_info = {
-            "0": json.loads(ai_info["content"])["player"],
-            "1": 1 - json.loads(ai_info["content"])["player"],
-        }
+        pacmanscore = env.get_pacman_score()
+        ghostscore = env.get_ghosts_score()
+        end_info = {}
+        if players[0].role == 0:
+            end_info = {
+                "0": pacmanscore,
+                "1": ghostscore,
+            }
+        else:
+            end_info = {
+                "0": ghostscore,
+                "1": pacmanscore,
+            }
         send_game_end_info(json.dumps(end_info), json.dumps(end_list))
         replay_file.close()
         time.sleep(0.5)
@@ -75,56 +87,62 @@ def get_ai_info( player , player_type , another_player_type ):
 
             if role == 0 :
                 # 表明玩家是吃豆人
-                assert(
-                    len(action) == 1
-                    and action[0] >= 0
-                    and action[0] < 5
-                )
+                # 若字符串格式有误则默认不动
+                if len(action) != 1 or action[0] < 0 or action[0] >= 5 : 
+                    action = [0]
             else :
-                assert(
-                    len(action) == 3
-                    and action[0] >= 0
-                    and action[0] < 5
-                    and action[1] >= 0
-                    and action[1] < 5
-                    and action[2] >= 0
-                    and action[2] < 5
-                ) 
+                # 表明玩家是幽灵
+                if len(action) != 3 or action[0] < 0 or action[0] >= 5 or action[1] < 0 or action[1] >= 5 or action[2] < 0 or action[2] >= 5 :
+                    action = [0,0,0]
             return role , action
         except:
             error = traceback.format_exc()
             return_dict = env.render()
             return_dict["StopReason"] = (
-                f"Invalid Operation {ai_info['content']} from player {player}, judger returned error {error}."
+                f"Invalid Operation {ai_info['content']} from player {playerid}, judger returned error {error}."
             )
             # 回放文件写入结束信息
             replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
 
             if player_type == 2:
                 send_to_judger(
-                    json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), player
+                    json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), playerid
                 )
 
             if another_player_type == 2:
                 send_to_judger(
                     json.dumps(return_dict, ensure_ascii=False).encode("utf-8"),
-                    1 - player,
+                    1 - playerid,
                 )
 
             end_state = ["OK", "OK"]
-            end_state[player] = "IA"
+            end_state[playerid] = "IA"
+
+            pacmanscore = env.get_pacman_score()
+            ghostscore = env.get_ghosts_score()
+            end_info = {}
+            if players[0].role == 0:
+                end_info = {
+                    "0": pacmanscore,
+                    "1": ghostscore,
+                }
+            else:
+                end_info = {
+                    "0": ghostscore,
+                    "1": pacmanscore,
+                }
+
             send_game_end_info(
-                json.dumps({"0": player, "1": 1 - player}), json.dumps(end_state)
+                json.dumps(end_info, ensure_ascii=False), json.dumps(end_state)
             )
             replay_file.close()
             time.sleep(0.5)
             exit(0)
 
-def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_type, ghost_type):
+def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     '''
     env: 游戏逻辑维护的唯一局面
     pacman_type, ghost_type: 玩家1和玩家2的类型: 1 为 AI, 2 为网页播放器。
-    1传str 2传json
     
     执行操作，输出要转发给对方的字符串
 
@@ -132,12 +150,41 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     '''
     # 执行两个玩家的操作
     try:
-        board , score , level_change = env.step(pacman_action[0], ghost_action)
+        board , score , level_change = env.step(pacman.action[0], ghosts.action)
     except:
         error = traceback.format_exc()
         return_dict = env.render()
         return_dict["StopReason"] = f"Error in executing actions from players, error: {error}"
         replay_file.write(json.dumps(return_dict, ensure_ascii=False) + "\n")
+        if pacman.type == 2:
+            send_to_judger(
+                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), pacman.id
+            )
+
+        if ghosts.type == 2:
+            send_to_judger(
+                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), ghosts.id
+            )
+
+        end_state = ["IA", "IA"]
+
+        pacmanscore = env.get_pacman_score()
+        ghostscore = env.get_ghosts_score()
+        end_info = {}
+        if pacman.id == 0:
+            end_info = {
+                "0": pacmanscore,
+                "1": ghostscore,
+            }
+        else:
+            end_info = {
+                "0": ghostscore,
+                "1": pacmanscore,
+            }
+
+        send_game_end_info(
+            json.dumps(end_info, ensure_ascii=False), json.dumps(end_state)
+        )
         replay_file.close()
         time.sleep(0.5)
         exit(0)
@@ -146,11 +193,11 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     new_state = env.render()
     replay_file.write(json.dumps(new_state, ensure_ascii=False) + "\n")
 
-    if pacman_type == 2:
-        send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), 0)
+    if pacman.type == 2:
+        send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), pacman.id)
 
-    if ghost_type == 2:
-        send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), 1)
+    if ghosts.type == 2:
+        send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), ghosts.id)
 
     # 返回新的状态信息
     game_continue = True
@@ -158,15 +205,8 @@ def interact(env: PacmanEnv, pacman_action, pacman, ghost_action, ghost, pacman_
     info2 = None
     if new_state['level'] != MAX_LEVEL or env.check_round_end() == False:
         # 游戏没有结束
-        if pacman_type == 1 :
-            info1 = str(new_state)
-        elif pacman_type == 2 :
-            info1 = json.dumps(new_state, ensure_ascii=False)
-        
-        if ghost_type == 1 :
-            info2 = str(new_state)
-        elif ghost_type == 2:
-            info2 = json.dumps(new_state, ensure_ascii=False)
+        info1 = json.dumps(new_state, ensure_ascii=False) # 返回给吃豆人的信息
+        info2 = json.dumps(new_state, ensure_ascii=False) # 返回给幽灵的信息
     else:
         game_continue = False
 
@@ -204,18 +244,19 @@ if __name__ == "__main__":
             replay_file.write(end_json + "\n")
 
             if players[0].type == 2:
-                send_to_judger(json.dumps(end_dict), 1)
+                send_to_judger(json.dumps(end_dict), 0)
 
             if players[1].type == 2:
-                send_to_judger(json.dumps(end_dict), 0)
+                send_to_judger(json.dumps(end_dict), 1)
 
             end_state = json.dumps(
                 ["OK" if players[0].type else "RE",
                     "OK" if players[1].type else "RE"]
             )
+            # 若初始化异常则都为0分
             end_info = {
-                "0": 1 if players[0].type else 0,
-                "1": 1 if players[1].type else 0,
+                "0": 0,
+                "1": 0,
             }
             send_game_end_info(json.dumps(end_info), end_state)
             replay_file.close()
@@ -252,42 +293,43 @@ if __name__ == "__main__":
                         [players[i].id,players[1-i].id],
                         [],
                     )
+                    
                 else:
                     level_change = 0
                     send_round_info(
                         state,
                         [players[i].id],
                         [players[i].id,players[1-i].id],
-                        [
-                            str(init_json) if players[0].type == 1 else init_json,
-                            str(init_json) if players[1].type == 1 else init_json,
-                        ],
+                        [init_json,init_json],
                     )
 
-                players[i].role , players[i].action = get_ai_info(players[i].id,players[i].type,players[1-i].type)
-            
+                players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+                quit_running()
             # 调用step
             state += 1
+            send_round_config(MAX_AI_TIME, MAX_LENGTH)
             if players[0].role == 0 :
                 # 0号玩家是吃豆人
                 game_continue , info1 , info2 , level_change = interact(
-                    env, players[0].action, players[0].id, players[1].action, players[1].id, players[0].type, players[1].type
+                    env, players[0] , players[1]
                 )
+
                 send_round_info(
                     state,
                     [],
-                    [players[0].type,players[1].type],
+                    [players[0].id,players[1].id],
                     [info1,info2],
                 )
+                
             else :
                 # 1号玩家是吃豆人
                 game_continue , info1 , info2 , level_change = interact(
-                    env, players[1].action, players[1].id, players[0].action, players[1].id, players[1].type, players[0].type
+                    env, players[1] , players[0]
                 )
                 send_round_info(
                     state,
                     [],
-                    [players[1].type,players[0].type],
+                    [players[1].id,players[0].id],
                     [info1,info2],
                 )
             
@@ -318,7 +360,7 @@ if __name__ == "__main__":
             send_to_judger(json.dumps(end_json, ensure_ascii=False).encode("utf-8"), 1)
 
         replay_file.write(json.dumps(end_json, ensure_ascii=False) + "\n")
-        send_game_end_info(json.dumps(end_info), end_state)
+        send_game_end_info(json.dumps(end_info, ensure_ascii=False), end_state)
         replay_file.close()
         time.sleep(1)
         exit(0)

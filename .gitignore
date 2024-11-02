@@ -8,3 +8,5 @@ replay
 
 ai_pacman.py
 ai_ghosts.py
+ai_ghosts_local.py
+ai_pacman_local.py
