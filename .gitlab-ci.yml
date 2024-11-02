@@ -3,4 +3,4 @@ image: python:latest
 run:
   script:
     - pip3 install requests websockets -i https://pypi.tuna.tsinghua.edu.cn/simple
-    - python upload.py --game "Pacman" --name "~ci~cpp~" --repo "$CI_PROJECT_URL" --commit "$CI_COMMIT_SHA" --lang auto --path . --logic
+    - python upload.py --game "Pacman" --name "~ci~cpp~" --repo "$CI_PROJECT_URL" --commit "$CI_COMMIT_SHA" --lang auto --path . --logic --dev
