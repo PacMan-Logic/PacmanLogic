@@ -192,7 +192,7 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     # 更新游戏状态
     new_state = env.render()
     replay_file.write(json.dumps(new_state, ensure_ascii=False) + "\n")
-
+    quit_running()
     if pacman.type == 2:
         send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), pacman.id)
 
@@ -313,7 +313,6 @@ if __name__ == "__main__":
                 game_continue , info1 , info2 , level_change = interact(
                     env, players[0] , players[1]
                 )
-                quit_running()
                 send_round_info(
                     state,
                     [],
@@ -327,7 +326,6 @@ if __name__ == "__main__":
                 game_continue , info1 , info2 , level_change = interact(
                     env, players[1] , players[0]
                 )
-                quit_running()
                 send_round_info(
                     state,
                     [],
