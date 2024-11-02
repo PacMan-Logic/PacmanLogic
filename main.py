@@ -313,27 +313,28 @@ if __name__ == "__main__":
                 game_continue , info1 , info2 , level_change = interact(
                     env, players[0] , players[1]
                 )
-
+                quit_running()
                 send_round_info(
                     state,
                     [],
                     [players[0].id,players[1].id],
                     [info1,info2],
                 )
-                quit_running()
+                
                 
             else :
                 # 1号玩家是吃豆人
                 game_continue , info1 , info2 , level_change = interact(
                     env, players[1] , players[0]
                 )
+                quit_running()
                 send_round_info(
                     state,
                     [],
                     [players[1].id,players[0].id],
                     [info1,info2],
                 )
-                quit_running()
+                
             
         end_state = json.dumps(
             ["OK", "OK"]
