@@ -306,8 +306,9 @@ if __name__ == "__main__":
                 
             # 调用step
             state += 1
-            send_round_config(MAX_AI_TIME, MAX_LENGTH)
             quit_running()
+            send_round_config(MAX_AI_TIME, MAX_LENGTH)
+            
             if players[0].role == 0 :
                 # 0号玩家是吃豆人
                 game_continue , info1 , info2 , level_change = interact(
