@@ -132,7 +132,6 @@ class PacmanEnv(gym.Env):
     def ghost_action_space(self):
         return self._ghost_action_space
 
-    # TODO: 重写reset函数（lxy） done
     def reset(self):
         self._size -= 20  # 80 60 40 20
         self._level += 1  # 0 1 2 3
@@ -170,7 +169,7 @@ class PacmanEnv(gym.Env):
             "score": [self._pacman_score, self._ghosts_score],
             "level": self._level,
             "board": return_board,
-            "status": 1,
+            "status": 1, # ???
         }
         return return_dict
     
@@ -398,7 +397,7 @@ class PacmanEnv(gym.Env):
             if not self._pacman.encounter_ghost():
                 self._ghosts[i].update_score(
                     DESTORY_PACMAN_SHIELD
-                )  # TODO: update_score
+                )
                 self.update_all_score()
                 self._status_code = StatusCode.DESTROY_SHIELD
             else:

@@ -90,8 +90,15 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
                     action = [0]
             else :
                 # 表明玩家是幽灵
-                if len(action) != 3 or action[0] < 0 or action[0] >= 5 or action[1] < 0 or action[1] >= 5 or action[2] < 0 or action[2] >= 5 :
+                if len(action) != 3 :
                     action = [0,0,0]
+                else :
+                    if action[0] < 0 or action[0] >= 5 :
+                        action[0] = 0
+                    if action[1] < 0 or action[1] >= 5 :
+                        action[1] = 0
+                    if action[2] < 0 or action[2] >= 5 :
+                        action[2] = 0
             return role , action
         except:
             error = traceback.format_exc()
@@ -268,10 +275,11 @@ if __name__ == "__main__":
         while game_continue:
             # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
             if level_change == 1:
-                if env.get_level() == 3 :
-                    break
-                init_json = json.dumps(env.reset(), ensure_ascii=False)
-                replay_file.write(init_json+'\n')
+                if env.get_level() >= 3 :
+                    game_continue = False
+                else :
+                    init_json = json.dumps(env.reset(), ensure_ascii=False)
+                    replay_file.write(init_json+'\n')
 
             if not game_continue:
                 break
@@ -339,8 +347,8 @@ if __name__ == "__main__":
         )
         pacmanscore = env.get_pacman_score()
         ghostscore = env.get_ghosts_score()
-        print("score_pacman: {}".format(pacmanscore)) 
-        print("score_ghost: {}".format(ghostscore)) 
+        # print("score_pacman: {}".format(pacmanscore)) 
+        # print("score_ghost: {}".format(ghostscore)) 
 
         end_json = env.render()
         end_json["StopReason"] = f"time is up"
