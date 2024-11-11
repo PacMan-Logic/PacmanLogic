@@ -437,7 +437,7 @@ class PacmanEnv(gym.Env):
                 i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
             self.update_all_score()
             self._pacman.reset()
-            self.status_code = StatusCode.END
+            self._status_code = StatusCode.END
             return self._board, [self._pacman_score, self._ghosts_score], True
 
         return self._board, [self._pacman_score, self._ghosts_score], False

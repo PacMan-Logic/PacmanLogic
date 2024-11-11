@@ -205,14 +205,8 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
 
     # 返回新的状态信息
     game_continue = True
-    info1 = None
-    info2 = None
-    if new_state['level'] != MAX_LEVEL or env.check_round_end() == False:
-        # 游戏没有结束
-        info1 = json.dumps(new_state, ensure_ascii=False) # 返回给吃豆人的信息
-        info2 = json.dumps(new_state, ensure_ascii=False) # 返回给幽灵的信息
-    else:
-        game_continue = False
+    info1 = json.dumps(new_state, ensure_ascii=False) # 返回给吃豆人的信息
+    info2 = json.dumps(new_state, ensure_ascii=False) # 返回给幽灵的信息
 
     return game_continue , info1 , info2 , level_change
 
@@ -277,6 +271,7 @@ if __name__ == "__main__":
             if level_change == 1:
                 if env.get_level() >= 3 :
                     game_continue = False
+                    
                 else :
                     init_json = json.dumps(env.reset(), ensure_ascii=False)
                     replay_file.write(init_json+'\n')
@@ -340,8 +335,7 @@ if __name__ == "__main__":
                     [players[1].id,players[0].id],
                     [info1,info2],
                 )
-                
-            
+
         end_state = json.dumps(
             ["OK", "OK"]
         )
@@ -371,7 +365,7 @@ if __name__ == "__main__":
         replay_file.write(json.dumps(end_json, ensure_ascii=False) + "\n")
         send_game_end_info(json.dumps(end_info, ensure_ascii=False), end_state)
         replay_file.close()
-        time.sleep(1)
+        time.sleep(10)
         exit(0)
 
     except Exception as e:
