@@ -275,10 +275,18 @@ if __name__ == "__main__":
         while game_continue:
             # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
             if level_change == 1:
+                if env.get_level() == 2 :
+                    replay_file.write("level=2```````````````````````````````````````````````````````````\n")
                 if env.get_level() >= 3 :
+                    replay_file.write("level=3```````````````````````````````````````````````````````````\n")
                     game_continue = False
                 else :
                     init_json = json.dumps(env.reset(), ensure_ascii=False)
+                    # if env.get_level() == 3 :
+                    #     replay_file.write("level=2->3```````````````````````````````````````````````````````````\n")
+                    #     quit_running()
+                    #     time.sleep(0.5)
+                    #     exit(0)
                     replay_file.write(init_json+'\n')
 
             if not game_continue:
@@ -341,7 +349,6 @@ if __name__ == "__main__":
                     [info1,info2],
                 )
                 
-            
         end_state = json.dumps(
             ["OK", "OK"]
         )
@@ -371,7 +378,7 @@ if __name__ == "__main__":
         replay_file.write(json.dumps(end_json, ensure_ascii=False) + "\n")
         send_game_end_info(json.dumps(end_info, ensure_ascii=False), end_state)
         replay_file.close()
-        time.sleep(1)
+        time.sleep(10)
         exit(0)
 
     except Exception as e:
