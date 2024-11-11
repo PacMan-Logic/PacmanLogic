@@ -1,0 +1,12 @@
+agent_test
+PacMan/*
+PacMan
+replay/*
+replay
+.DS_Store
+**/__pycache__/
+
+ai_pacman.py
+ai_ghosts.py
+ai_ghosts_local.py
+ai_pacman_local.py
