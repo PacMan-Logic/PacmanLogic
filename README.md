@@ -1,6 +1,8 @@
 # 开发规范
-新建功能 feat: 
+新建功能 feat:
+
 修复功能 fix:
+
 saiblo: #XX
 
 # 通信
