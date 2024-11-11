@@ -2,6 +2,7 @@ import numpy as np
 import random
 
 # note: level1 9*20*20 level2 4*20*20 level3 1*20*20
+# no use message for testing
 
 def final_boardgenerator(actual_size):
     size = 20
