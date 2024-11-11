@@ -205,14 +205,8 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
 
     # 返回新的状态信息
     game_continue = True
-    info1 = None
-    info2 = None
-    if new_state['level'] != MAX_LEVEL or env.check_round_end() == False:
-        # 游戏没有结束
-        info1 = json.dumps(new_state, ensure_ascii=False) # 返回给吃豆人的信息
-        info2 = json.dumps(new_state, ensure_ascii=False) # 返回给幽灵的信息
-    else:
-        game_continue = False
+    info1 = json.dumps(new_state, ensure_ascii=False) # 返回给吃豆人的信息
+    info2 = json.dumps(new_state, ensure_ascii=False) # 返回给幽灵的信息
 
     return game_continue , info1 , info2 , level_change
 
@@ -275,22 +269,11 @@ if __name__ == "__main__":
         while game_continue:
             # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
             if level_change == 1:
-                if env.get_level() == 2 :
-                    replay_file.write("level=2```````````````````````````````````````````````````````````\n")
                 if env.get_level() >= 3 :
-                    replay_file.write("level=3```````````````````````````````````````````````````````````\n")
                     game_continue = False
-                    quit_running()
-                    time.sleep(1)
-                    exit(0) 
                     
                 else :
                     init_json = json.dumps(env.reset(), ensure_ascii=False)
-                    # if env.get_level() == 3 :
-                    #     replay_file.write("level=2->3```````````````````````````````````````````````````````````\n")
-                    #     quit_running()
-                    #     time.sleep(0.5)
-                    #     exit(0)
                     replay_file.write(init_json+'\n')
 
             if not game_continue:
