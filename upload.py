@@ -138,7 +138,7 @@ def upload():
                     code = requests.post(
                         f"{api_base}entities/{entity_id}/codes/",
                         headers=headers,
-                        data={"commit_id": args.commit, "remark": args.remark},
+                        data={"commit_id": args.commit},
                         files={"file": f},
                     ).json()
                     version = code["version"]
