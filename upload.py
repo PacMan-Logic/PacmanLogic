@@ -43,7 +43,6 @@ def upload():
     parser.add_argument("--name", type=str, required=True, help="AI 名称")
     parser.add_argument("--repo", type=str, required=True, help="AI 仓库 url")
     parser.add_argument("--commit", type=str, required=True, help="AI 提交哈希")
-    parser.add_argument("--remark", type=str, required=False, help="AI 提交备注")
     parser.add_argument(
         "--lang", type=Language, choices=list(Language), required=True, help="AI 语言"
     )
@@ -138,7 +137,7 @@ def upload():
                     code = requests.post(
                         f"{api_base}entities/{entity_id}/codes/",
                         headers=headers,
-                        data={"commit_id": args.commit, "remark": args.remark},
+                        data={"commit_id": args.commit},
                         files={"file": f},
                     ).json()
                     version = code["version"]
