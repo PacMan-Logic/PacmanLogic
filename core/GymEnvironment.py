@@ -13,7 +13,7 @@ from .gamedata import *
 
 import os
 
-
+# note: to find out why I am not on the contributor list
 def opposite_direction(x, y): # dont need this now
     if x == 0 or y == 0:
         return True
