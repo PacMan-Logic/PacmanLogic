@@ -1,7 +1,66 @@
 import numpy as np
 import random
 
-def boardgenerator(size):
+def final_boardgenerator(actual_size):
+    size = 20
+    num_blocks = actual_size // size
+    final_board = np.full((actual_size, actual_size), 2)
+    
+    for i in range(num_blocks):
+        for j in range(num_blocks):
+            block = boardgenerator(size, actual_size)
+            final_board[i*size:(i+1)*size, j*size:(j+1)*size] = block
+    
+    if actual_size == 60:
+        # 设置特定坐标的元素值为2(加通道)
+        coordinates = [
+            (9, 19), (9, 20),
+            (10, 19), (10, 20),
+            (29, 19), (29, 20),
+            (30, 19), (30, 20), 
+            (19, 9), (20, 9), 
+            (19, 10), (20, 10), 
+            (19, 29), (19, 30), 
+            (20, 29), (20, 30),
+            (9, 39), (9, 40),
+            (10, 39), (10, 40),
+            (19, 49), (19, 50), 
+            (20, 49), (20, 50),
+            (29, 39), (29, 40),
+            (30, 39), (30, 40), 
+            (49, 39), (49, 40),
+            (50, 39), (50, 40), 
+            (49, 19), (49, 20),
+            (50, 19), (50, 20),
+            (39, 9), (40, 9), 
+            (39, 10), (40, 10), 
+            (39, 29), (40, 29), 
+            (39, 30), (40, 30), 
+            (39, 49), (40, 49), 
+            (39, 50), (40, 50)
+        ]
+        
+        for coord in coordinates:
+            final_board[coord] = 2
+
+    elif actual_size == 40:
+        coordinates = [
+            (9, 19), (9, 20),
+            (10, 19), (10, 20),
+            (29, 19), (29, 20),
+            (30, 19), (30, 20), 
+            (19, 9), (20, 9), 
+            (19, 10), (20, 10), 
+            (19, 29), (19, 30), 
+            (20, 29), (20, 30)
+        ]
+        for coord in coordinates:
+            final_board[coord] = 2
+            
+    return final_board
+    
+
+def boardgenerator(size, actual_size):
     # 创建20x20的二维数组，所有元素初始化为2（普通豆子）
     board = np.full((size, size), 2)
 
@@ -36,7 +95,7 @@ def boardgenerator(size):
                     board[i][j] = 6
                 elif number < 25:
                     board[i][j] = 7
-                elif (size == 60 or size == 40) and number > 75: # 空间太大，豆子太多，需要减少豆子数量
+                elif (actual_size == 60 or actual_size == 40) and number > 75: # 空间太大，豆子太多，需要减少豆子数量
                     board[i][j] = 1
      
     # 在地图的边缘添加墙壁

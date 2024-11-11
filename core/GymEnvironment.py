@@ -5,7 +5,7 @@ import random
 import gym
 import numpy as np
 from gym import spaces
-from .board import boardgenerator
+from .board import *
 from .pacman import Pacman
 from .ghost import Ghost
 from .gamedata import *
@@ -153,7 +153,7 @@ class PacmanEnv(gym.Env):
         self._ghosts[1].set_coord(coords[2])
         self._ghosts[2].set_coord(coords[3])
 
-        self._board = boardgenerator(self._size)
+        self._board = final_boardgenerator(self._size)
 
         self._boardlist.append(self._board)  # Note: store the board for rendering
 
