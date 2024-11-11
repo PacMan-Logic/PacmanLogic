@@ -50,8 +50,7 @@ class PacmanEnv(gym.Env):
         self._pacman = Pacman()
         self._ghosts = [Ghost(), Ghost(), Ghost()]
 
-        # Note: 0:nothing happens, 1:caught by ghost, 2:destroy the shield, 3:finish the game
-        self._status_code = StatusCode.NORMAL
+        self._event_list = []
 
         self._last_skill_status = [0] * SKILL_NUM
 
@@ -121,8 +120,8 @@ class PacmanEnv(gym.Env):
                 "round": self._round,
                 "score": [self._pacman_score, self._ghosts_score],
                 "level": self._level,
+                "events": self._event_list,
                 "StopReason": None,
-                "status": self._status_code.value,
             }
             return return_dict
 
@@ -163,8 +162,6 @@ class PacmanEnv(gym.Env):
 
         self._round = 0
 
-        self._status_code = StatusCode.NORMAL
-
         return_board = self._board.tolist()
 
         return_dict = {
@@ -204,6 +201,11 @@ class PacmanEnv(gym.Env):
     # Note: 如果pacman撞墙(x,y), step(x-100, y-100); 如果ghost撞墙(x,y), step(x-200, y-200)
     def step(self, pacmanAction: int, ghostAction: List[int]):
 
+        self._round += 1
+
+        # 重置事件列表（本轮）
+        self._event_list = []
+
         self._last_operation = []
         self._ghosts_step_block = [[], [], []]
         self._pacman_step_block = []
@@ -219,7 +221,6 @@ class PacmanEnv(gym.Env):
         self._pacman_step_block.append(pacman_coord)
         for i in range(3):
             self._ghosts_step_block[i].append(ghost_coords[i])
-            # print(self._ghosts_step_block[i])
 
         self._pacman.eat_bean(self._board)  # 吃掉此处的豆子
         pacman_skills = self._pacman.get_skills_status()  # 更新状态
@@ -390,12 +391,18 @@ class PacmanEnv(gym.Env):
             else:
                 raise ValueError("Invalid action of ghost")
         self.update_all_score()
+
         # check if ghosts caught pacman
-        # TODO: specialize return value when respawning
-        # Note: Original code corresponding wrongly
         flag = False
         for i in range(3):
             if pacman_skills[Skill.SPEED_UP.value] > 0:
+
+                # NOTE: debugging start
+                assert len(self._pacman_step_block) > 2
+                for g in self._ghosts:
+                    assert len(self._ghosts_step_block) > 1
+                # NOTE: debugging end
+
                 if self._pacman_step_block[-2] == self._ghosts_step_block[i][-1]:
                     flag = True
             if self._pacman_step_block[-1] == self._ghosts_step_block[i][-1]:
@@ -405,7 +412,7 @@ class PacmanEnv(gym.Env):
             if not self._pacman.encounter_ghost():
                 self._ghosts[i].update_score(DESTORY_PACMAN_SHIELD)
                 self.update_all_score()
-                self._status_code = StatusCode.DESTROY_SHIELD
+                self._event_list.append(Event.SHEILD_DESTROYED)
             else:
                 self._pacman.update_score(EATEN_BY_GHOST)
                 self._ghosts[i].update_score(EAT_PACMAN)
@@ -413,11 +420,12 @@ class PacmanEnv(gym.Env):
                 self._pacman.set_coord(self.find_distant_emptyspace())
                 # Note: if caught, the respawning coord will be stored at the last position of the list"pacman_step_block"
                 self._pacman_step_block.append(self._pacman.get_coord())
-                self._status_code = StatusCode.CAUGHT
+                self._event_list.append(Event.EATEN_BY_GHOST)
 
-        # notice! its a new round
-        self._round += 1
+        # diminish the skill time
         self._pacman.new_round()
+        # 避免出现最后一轮明明达到了最后一个豆子，但是还是会被判定为超时的问题
+        self._pacman.eat_bean()
 
         # check if the game is over
         count_remain_beans = 0
@@ -425,6 +433,8 @@ class PacmanEnv(gym.Env):
             for j in range(self._size):
                 if self._board[i][j] == 2 | 3:
                     count_remain_beans += 1
+
+        # 通关
         if count_remain_beans == 0:
             self._pacman.update_score(
                 EAT_ALL_BEANS
@@ -432,20 +442,20 @@ class PacmanEnv(gym.Env):
             )
             self.update_all_score()
             self._pacman.reset()
-            self._status_code = StatusCode.END
-            return (
-                self._board,
-                [self._pacman_score, self._ghosts_score],
-                True,
-            )  # true means game over
+            self._event_list.append(Event.FINISH_LEVEL)
+            # return true means game over
+            return (self._board, [self._pacman_score, self._ghosts_score], True)
+
+        # 超时
         if self._round >= MAX_ROUND[self._level]:
             for i in self._ghosts:
                 i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
             self.update_all_score()
             self._pacman.reset()
-            self._status_code = StatusCode.END
-            return self._board, [self._pacman_score, self._ghosts_score], True
+            self._event_list.append(Event.TIMEOUT)
+            return (self._board, [self._pacman_score, self._ghosts_score], True)
 
+        # 正常
         return self._board, [self._pacman_score, self._ghosts_score], False
 
     def get_pacman_score(self):
@@ -478,5 +488,5 @@ class PacmanEnv(gym.Env):
             return True
         return False
 
-    def status(self):
-        return self._status_code
+    def events(self):
+        return self._event_list

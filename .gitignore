@@ -5,6 +5,7 @@ replay/*
 replay
 .DS_Store
 **/__pycache__/
+simulate.py
 
 ai_pacman.py
 ai_ghosts.py

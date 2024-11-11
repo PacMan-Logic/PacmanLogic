@@ -4,7 +4,6 @@ from .gamedata import *
 class Pacman:
     def __init__(
         self,
-        id=0,
         score=0,
         double_score=0,
         speed_up=0,
@@ -13,7 +12,6 @@ class Pacman:
         x=-1,
         y=-1,
     ):
-        self.id = id  # FIXME: how should it be used?
         self._score = score
         self._skill_status = [double_score, speed_up, magnet, shield]
         self._coord = [x, y]
@@ -28,7 +26,7 @@ class Pacman:
         if board[x][y] == Space.REGULAR_BEAN.value:
             board[x][y] = Space.EMPTY.value
             self.update_score(1)
-            
+
         elif board[x][y] == Space.BONUS_BEAN.value:
             board[x][y] = Space.EMPTY.value
             self.update_score(2)
@@ -36,7 +34,7 @@ class Pacman:
         elif board[x][y] == Space.SPEED_BEAN.value:
             board[x][y] = Space.EMPTY.value
             self.acquire_skill(Skill.SPEED_UP)
-            
+
         elif board[x][y] == Space.MAGNET_BEAN.value:
             board[x][y] = Space.EMPTY.value
             self.acquire_skill(Skill.MAGNET)
@@ -48,7 +46,6 @@ class Pacman:
         elif board[x][y] == Space.DOUBLE_BEAN.value:
             board[x][y] = Space.EMPTY.value
             self.acquire_skill(Skill.DOUBLE_SCORE)
-            
 
     def eat_bean(self, board):
         x, y = self._coord
@@ -81,7 +78,9 @@ class Pacman:
         if skill_index == Skill.SHIELD:
             self._skill_status[Skill.SHIELD.value] += 1
         else:
-            self._skill_status[skill_index.value] = DEFAULT_SKILL_TIME[skill_index.value]
+            self._skill_status[skill_index.value] = DEFAULT_SKILL_TIME[
+                skill_index.value
+            ]
 
     def new_round(self):  # Note: reset the skill status when a new round starts
         if self._skill_status[Skill.DOUBLE_SCORE.value] > 0:
@@ -90,8 +89,6 @@ class Pacman:
             self._skill_status[Skill.MAGNET.value] -= 1
         if self._skill_status[Skill.SPEED_UP.value] > 0:
             self._skill_status[Skill.SPEED_UP.value] -= 1
-            
-            
 
     def get_score(self):
         return self._score
@@ -130,7 +127,6 @@ class Pacman:
             return True
         else:
             return False
-        
-        
+
     def reset(self):
         self._skill_status = [0, 0, 0, 0]
