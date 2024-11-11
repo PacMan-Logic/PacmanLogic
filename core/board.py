@@ -1,6 +1,8 @@
 import numpy as np
 import random
 
+# note: level1 9*20*20 level2 4*20*20 level3 1*20*20
+
 def final_boardgenerator(actual_size):
     size = 20
     num_blocks = actual_size // size
