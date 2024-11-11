@@ -185,15 +185,6 @@ class PacmanEnv(gym.Env):
     def check_round_end(self):
         return self._round >= MAX_ROUND[self._level]
 
-    def get_action(self, action):
-        assert len(action) == 4
-        pacman = [action[0]]
-        ghost = action[1:]
-        return pacman, ghost
-
-    def num_to_coord(self, num):
-        return num // self._size, num % self._size
-
     def update_all_score(self):
         self._pacman_score = self.get_pacman_score()
         self._ghosts_score = self.get_ghosts_score()
@@ -224,10 +215,11 @@ class PacmanEnv(gym.Env):
 
         self._pacman.eat_bean(self._board)  # 吃掉此处的豆子
         pacman_skills = self._pacman.get_skills_status()  # 更新状态
+        # Note: 向下和向上的位置对调
         if pacman_skills[Skill.SPEED_UP.value] > 0:
             if pacmanAction == 0:
                 self._pacman_step_block.append(self._pacman.get_coord())
-            elif pacmanAction == 1:  # 向上移动
+            elif pacmanAction == 3:  # 向下移动
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.up(self._board)
@@ -265,7 +257,7 @@ class PacmanEnv(gym.Env):
                         self._pacman.get_coord()[1] - 100 - 1,
                     ]
                 )
-            elif pacmanAction == 3:  # 向下移动
+            elif pacmanAction == 1:  # 向上移动
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.down(self._board)
@@ -308,7 +300,7 @@ class PacmanEnv(gym.Env):
         else:
             if pacmanAction == 0:
                 self._pacman_step_block.append(self._pacman.get_coord())
-            elif pacmanAction == 1:
+            elif pacmanAction == 3:
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.up(self._board)
@@ -326,7 +318,7 @@ class PacmanEnv(gym.Env):
                         self._pacman.get_coord()[1] - 100 - 1,
                     ]
                 )
-            elif pacmanAction == 3:
+            elif pacmanAction == 1:
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.down(self._board)
@@ -352,7 +344,7 @@ class PacmanEnv(gym.Env):
             if ghostAction[i] == 0:
                 self._ghosts_step_block[i].append(self._ghosts[i].get_coord())
                 pass
-            elif ghostAction[i] == 1:
+            elif ghostAction[i] == 3:
                 self._ghosts_step_block[i].append(
                     self._ghosts[i].get_coord()
                     if self._ghosts[i].up(self._board)
@@ -370,7 +362,7 @@ class PacmanEnv(gym.Env):
                         self._ghosts[i].get_coord()[1] - 200 - 1,
                     ]
                 )
-            elif ghostAction[i] == 3:
+            elif ghostAction[i] == 1:
                 self._ghosts_step_block[i].append(
                     self._ghosts[i].get_coord()
                     if self._ghosts[i].down(self._board)
@@ -425,7 +417,11 @@ class PacmanEnv(gym.Env):
         # diminish the skill time
         self._pacman.new_round()
         # 避免出现最后一轮明明达到了最后一个豆子，但是还是会被判定为超时的问题
-        self._pacman.eat_bean()
+        try: 
+            self._pacman.eat_bean(self._board)
+        except:
+            print("Pacman eat bean error")
+            exit(1)
 
         # check if the game is over
         count_remain_beans = 0
