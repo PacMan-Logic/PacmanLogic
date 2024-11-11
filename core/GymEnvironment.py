@@ -14,7 +14,7 @@ from .gamedata import *
 import os
 
 
-def opposite_direction(x, y): # dont need this now
+def opposite_direction(x, y):  # dont need this now
     if x == 0 or y == 0:
         return True
     if (x == 1 and y == 3) or (x == 3 and y == 1):
@@ -24,7 +24,7 @@ def opposite_direction(x, y): # dont need this now
     return False
 
 
-def have_same_element(a, b): # dont need this now
+def have_same_element(a, b):  # dont need this now
     for i in a:
         if i in b:
             return True
@@ -79,7 +79,7 @@ class PacmanEnv(gym.Env):
     # FIXME: 有测试更改
     def render(self, mode="logic"):
         if mode == "local":
-            #os.system("clear")
+            # os.system("clear")
             for i in range(self._size):
                 for j in range(self._size):
                     if self._pacman.get_coord() == [i, j]:
@@ -87,7 +87,7 @@ class PacmanEnv(gym.Env):
                         continue
                     if [i, j] in [ghost.get_coord() for ghost in self._ghosts]:
                         print("\033[1;40m  \033[0m", end="")
-                        continue    
+                        continue
                     if self._board[i][j] == 0:
                         print("\033[1;41m  \033[0m", end="")  # 墙：红
                     elif self._board[i][j] == 1:
@@ -103,13 +103,17 @@ class PacmanEnv(gym.Env):
                     elif self._board[i][j] == 6:
                         print("\033[1;46m  \033[0m", end="")  # 护盾豆子：青
                     elif self._board[i][j] == 7:
-                        print("\033[1;48;5;208m  \033[0m", end="")   # *2豆子：橘
+                        print("\033[1;48;5;208m  \033[0m", end="")  # *2豆子：橘
                 print()
 
         elif mode == "logic":  # 返回一个字典
             return_dict = {
                 "ghosts_step_block": self._ghosts_step_block,
-                "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
+                "ghosts_coord": [
+                    self._ghosts[0].get_coord(),
+                    self._ghosts[1].get_coord(),
+                    self._ghosts[2].get_coord(),
+                ],
                 "pacman_step_block": self._pacman_step_block,
                 "pacman_coord": self._pacman.get_coord(),
                 "pacman_skills": self._last_skill_status,
@@ -162,19 +166,24 @@ class PacmanEnv(gym.Env):
         self._status_code = StatusCode.NORMAL
 
         return_board = self._board.tolist()
-        
+
         return_dict = {
-            "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
+            "ghosts_coord": [
+                self._ghosts[0].get_coord(),
+                self._ghosts[1].get_coord(),
+                self._ghosts[2].get_coord(),
+            ],
             "pacman_coord": self._pacman.get_coord(),
             "score": [self._pacman_score, self._ghosts_score],
             "level": self._level,
             "board": return_board,
-            "status": 1, # ???
+            "status": 1,  # ???
         }
         return return_dict
-    
+
     def get_level(self):
         return self._level
+
     # step utils
     def check_round_end(self):
         return self._round >= MAX_ROUND[self._level]
@@ -202,7 +211,6 @@ class PacmanEnv(gym.Env):
         self._last_skill_status = self._pacman.get_skills_status()
         self._last_operation = [pacmanAction, ghostAction]
 
-        
         pacman_coord = self._pacman.get_coord()
         ghost_coords = [ghost.get_coord() for ghost in self._ghosts]
 
@@ -213,8 +221,8 @@ class PacmanEnv(gym.Env):
             self._ghosts_step_block[i].append(ghost_coords[i])
             # print(self._ghosts_step_block[i])
 
-        self._pacman.eat_bean(self._board) # 吃掉此处的豆子
-        pacman_skills = self._pacman.get_skills_status() # 更新状态
+        self._pacman.eat_bean(self._board)  # 吃掉此处的豆子
+        pacman_skills = self._pacman.get_skills_status()  # 更新状态
         if pacman_skills[Skill.SPEED_UP.value] > 0:
             if pacmanAction == 0:
                 self._pacman_step_block.append(self._pacman.get_coord())
@@ -228,7 +236,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
-                pacman_skills = self._pacman.get_skills_status() # 更新状态
+                pacman_skills = self._pacman.get_skills_status()  # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.up(self._board)
@@ -247,7 +255,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
-                pacman_skills = self._pacman.get_skills_status() # 更新状态
+                pacman_skills = self._pacman.get_skills_status()  # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.left(self._board)
@@ -266,7 +274,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
-                pacman_skills = self._pacman.get_skills_status() # 更新状态
+                pacman_skills = self._pacman.get_skills_status()  # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.down(self._board)
@@ -285,7 +293,7 @@ class PacmanEnv(gym.Env):
                     ]
                 )
                 self._pacman.eat_bean(self._board)
-                pacman_skills = self._pacman.get_skills_status() # 更新状态
+                pacman_skills = self._pacman.get_skills_status()  # 更新状态
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
                     if self._pacman.right(self._board)
@@ -395,9 +403,7 @@ class PacmanEnv(gym.Env):
 
         if flag:
             if not self._pacman.encounter_ghost():
-                self._ghosts[i].update_score(
-                    DESTORY_PACMAN_SHIELD
-                )
+                self._ghosts[i].update_score(DESTORY_PACMAN_SHIELD)
                 self.update_all_score()
                 self._status_code = StatusCode.DESTROY_SHIELD
             else:
@@ -437,7 +443,7 @@ class PacmanEnv(gym.Env):
                 i.update_score(PREVENT_PACMAN_EAT_ALL_BEANS)
             self.update_all_score()
             self._pacman.reset()
-            self.status_code = StatusCode.END
+            self._status_code = StatusCode.END
             return self._board, [self._pacman_score, self._ghosts_score], True
 
         return self._board, [self._pacman_score, self._ghosts_score], False
