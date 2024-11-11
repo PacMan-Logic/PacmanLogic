@@ -120,7 +120,7 @@ class PacmanEnv(gym.Env):
                 "round": self._round,
                 "score": [self._pacman_score, self._ghosts_score],
                 "level": self._level,
-                "events": self._event_list,
+                "events": [i.value for i in self._event_list],
                 "StopReason": None,
             }
             return return_dict
