@@ -280,6 +280,9 @@ if __name__ == "__main__":
                 if env.get_level() >= 3 :
                     replay_file.write("level=3```````````````````````````````````````````````````````````\n")
                     game_continue = False
+                    quit_running()
+                    time.sleep(1)
+                    exit(0) 
                     
                 else :
                     init_json = json.dumps(env.reset(), ensure_ascii=False)
@@ -350,9 +353,6 @@ if __name__ == "__main__":
                     [info1,info2],
                 )
 
-        quit_running()
-        time.sleep(1)
-        exit(0) 
         end_state = json.dumps(
             ["OK", "OK"]
         )
