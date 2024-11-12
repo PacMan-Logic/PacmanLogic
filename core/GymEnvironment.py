@@ -392,7 +392,7 @@ class PacmanEnv(gym.Env):
 
                 # NOTE: debugging start
                 assert len(self._pacman_step_block) > 2
-                for g in self._ghosts:
+                for g in self._ghosts_step_block:
                     assert len(g) > 1
                 # NOTE: debugging end
 
