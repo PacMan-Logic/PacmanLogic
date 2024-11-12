@@ -219,6 +219,7 @@ class PacmanEnv(gym.Env):
         if pacman_skills[Skill.SPEED_UP.value] > 0:
             if pacmanAction == 0:
                 self._pacman_step_block.append(self._pacman.get_coord())
+                self._pacman_step_block.append(self._pacman.get_coord())
             elif pacmanAction == 3:  # 向下移动
                 self._pacman_step_block.append(
                     self._pacman.get_coord()
@@ -417,7 +418,7 @@ class PacmanEnv(gym.Env):
         # diminish the skill time
         self._pacman.new_round()
         # 避免出现最后一轮明明达到了最后一个豆子，但是还是会被判定为超时的问题
-        try: 
+        try:
             self._pacman.eat_bean(self._board)
         except:
             print("Pacman eat bean error")
