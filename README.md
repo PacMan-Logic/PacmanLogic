@@ -28,7 +28,7 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
 ## 逻辑->用户
 三个阶段
 
-阶段一：读入吃豆人发的消息，如果有棋盘更新会发送info
+若改变棋盘则发送初始化信息
 ```py
 {
     "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
@@ -38,6 +38,8 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
     "board": return_board, # 二维数组，棋盘 
 }
 ```
+
+阶段一：读入吃豆人发的消息
 
 阶段二：读入幽灵发的消息
 

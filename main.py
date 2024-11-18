@@ -197,12 +197,6 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     # 更新游戏状态
     new_state = env.render()
     replay_file.write(json.dumps(new_state, ensure_ascii=False) + "\n")
-    if pacman.type == 2:
-        send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), pacman.id)
-
-    if ghosts.type == 2:
-        send_to_judger(json.dumps(new_state, ensure_ascii=False).encode("utf-8"), ghosts.id)
-
     # 返回新的状态信息
     game_continue = True
     info1 = "" # 返回给吃豆人的信息
@@ -291,6 +285,9 @@ if __name__ == "__main__":
                 else :
                     init_json = json.dumps(env.reset(), ensure_ascii=False)
                     replay_file.write(init_json+'\n')
+                    send_to_judger(json.dumps(init_json, ensure_ascii=False).encode("utf-8"), 0)
+                    send_to_judger(json.dumps(init_json, ensure_ascii=False).encode("utf-8"), 1)
+                    level_change = 0
 
             if not game_continue:
                 break
@@ -303,23 +300,13 @@ if __name__ == "__main__":
                 elif players[1-i].type == 2:
                     send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
 
-                # level发生改变时将初始化信息发给ai，未改变时发送空串
-                if level_change == 0:
-                    send_round_info(
-                        state,
-                        [players[i].id],
-                        [],
-                        [],
-                    )
-                    
-                else:
-                    level_change = 0
-                    send_round_info(
-                        state,
-                        [players[i].id],
-                        [players[i].id,players[1-i].id],
-                        [init_json,init_json],
-                    )
+                # 不发送东西
+                send_round_info(
+                    state,
+                    [players[i].id],
+                    [],
+                    [],
+                )
 
                 players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
                 
