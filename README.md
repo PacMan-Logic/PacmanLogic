@@ -1,6 +1,8 @@
 # 开发规范
 新建功能 feat: 
+
 修复功能 fix:
+
 saiblo: #XX
 
 # 通信
@@ -34,7 +36,6 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
     "score": [self._pacman_score, self._ghosts_score],
     "level": self._level,
     "board": return_board, # 二维数组，棋盘 
-    "status": 1,
 }
 ```
 
@@ -45,7 +46,14 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
 每局结束发给ai的info
 ```py
 {
-    "player": self._player, # ???
+    "pacman_action" : pacman.action[0],
+    "ghosts_action" : ghosts.action
+}
+```
+
+每局结束发给播放器的info
+```py
+{
     "ghosts_step_block": self._ghosts_step_block, # 幽灵走过路径
     "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()], # 幽灵坐标
     "pacman_step_block": self._pacman_step_block, # 吃豆人路径

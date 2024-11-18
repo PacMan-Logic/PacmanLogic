@@ -205,8 +205,24 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
 
     # 返回新的状态信息
     game_continue = True
-    info1 = json.dumps(new_state, ensure_ascii=False) # 返回给吃豆人的信息
-    info2 = json.dumps(new_state, ensure_ascii=False) # 返回给幽灵的信息
+    info1 = "" # 返回给吃豆人的信息
+    info2 = "" # 返回给幽灵的信息
+    if pacman.type == 1:
+        info_to_ai = {
+            "pacman_action" : pacman.action[0],
+            "ghosts_action" : ghosts.action
+        }
+        info1 = json.dumps(info_to_ai, ensure_ascii=False)
+    elif pacman.type == 2:
+        info1 = json.dumps(new_state, ensure_ascii=False) 
+    if ghosts.type == 1:
+        info_to_ai = {
+            "pacman_action" : pacman.action[0],
+            "ghosts_action" : ghosts.action
+        }
+        info2 = json.dumps(info_to_ai, ensure_ascii=False)
+    elif ghosts.type == 2:
+        info2 = json.dumps(new_state, ensure_ascii=False) 
 
     return game_continue , info1 , info2 , level_change
 
