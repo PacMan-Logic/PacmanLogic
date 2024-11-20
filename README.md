@@ -1,9 +1,13 @@
 # 开发规范
-新建功能 feat: 
-
-修复功能 fix:
-
-saiblo: #XX
+| | |
+| -------- | -------- |
+| 新建功能 | feat: |
+| 修复功能 | fix: |
+| 更新文档 | docs: |
+| 修改格式 | style: |
+| 代码优化 | perf: |
+| 测试功能 | test: |
+| saiblo上更新逻辑版本 | saiblo: #XX |
 
 # 通信
 ## 用户->逻辑：json转化为的字符串
@@ -26,7 +30,6 @@ saiblo: #XX
 action 为 0/1/2/3/4 表示 不动/上/左/下/右
 
 ## 逻辑->用户
-三个阶段
 
 若改变棋盘则发送初始化信息
 ```py
@@ -38,6 +41,8 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
     "board": return_board, # 二维数组，棋盘 
 }
 ```
+
+三个阶段
 
 阶段一：读入吃豆人发的消息
 
@@ -66,14 +71,16 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
     "score": [self._pacman_score, self._ghosts_score], # 吃豆人、幽灵分数
     "level": self._level, # 关卡数
     "StopReason": None,
-    "event_list": List[int] 
-    
-    class Event(enum.Enum):
-        # 0 and 1 should not occur simutaneously
-        EATEN_BY_GHOST = 0 # when eaten by ghost, there are two events to be rendered. first, there should be a animation of pacman being caught by ghost. then, the game should pause for a while, and display a respawning animaiton after receiving next coord infomation.
-        SHEILD_DESTROYED = 1 
-        # 2 and 3 should not occur simutaneously
-        FINISH_LEVEL= 2
-        TIMEOUT = 3
+    "event_list": List[int]
 }
+```
+event_list中数与事件的对应如下：
+```py
+class Event(enum.Enum):
+    # 0 and 1 should not occur simutaneously
+    EATEN_BY_GHOST = 0 # when eaten by ghost, there are two events to be rendered. first, there should be a animation of pacman being caught by ghost. then, the game should pause for a while, and display a respawning animaiton after receiving next coord infomation.
+    SHEILD_DESTROYED = 1 
+    # 2 and 3 should not occur simutaneously
+    FINISH_LEVEL= 2
+    TIMEOUT = 3
 ```

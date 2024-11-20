@@ -309,6 +309,7 @@ if __name__ == "__main__":
                 )
 
                 players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+                send_to_judger(f"player {i} send info", 1-i)
                 
             # 调用step
             state += 1
