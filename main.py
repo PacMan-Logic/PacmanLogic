@@ -272,6 +272,12 @@ if __name__ == "__main__":
             exit(0)
 
         state = 0
+        send_round_info(
+            state,
+            [],
+            [0,1],
+            ["0","1"],
+        )
 
         game_continue = True
         level_change = 1
