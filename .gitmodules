@@ -1,3 +1,4 @@
 [submodule "core"]
 	path = core
 	url = git@github.com:PacMan-Logic/Logic-core.git
+	branch = dev

@@ -216,8 +216,7 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
         }
         info2 = json.dumps(info_to_ai, ensure_ascii=False)
     elif ghosts.type == 2:
-        info2 = json.dumps(new_state, ensure_ascii=False) 
-
+        info2 = json.dumps(new_state, ensure_ascii=False)
     return game_continue , info1 , info2 , level_change
 
 
@@ -271,14 +270,13 @@ if __name__ == "__main__":
             time.sleep(1)
             exit(0)
 
-        state = 0
+        state = 1
         send_round_info(
             state,
             [],
             [0,1],
             ["0","1"],
         )
-
         game_continue = True
         level_change = 1
         # 一局中包含三个state 1.接收吃豆人消息 2.接收幽灵消息 3.调用step
@@ -315,8 +313,8 @@ if __name__ == "__main__":
                 )
 
                 players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
-                send_to_judger(f"player {i} send info", 1-i)
-                
+                send_to_judger(f"player {i} send info".encode("utf-8"), 1-i)
+
             # 调用step
             state += 1
             send_round_config(MAX_AI_TIME, MAX_LENGTH)
