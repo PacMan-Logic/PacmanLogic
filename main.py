@@ -270,50 +270,80 @@ if __name__ == "__main__":
             time.sleep(1)
             exit(0)
 
+        # 第一回合发送座位信息
         state = 1
         send_round_info(
             state,
             [],
             [0,1],
-            ["0","1"],
+            ["0"+'\n',"1"+'\n'],
         )
         game_continue = True
-        level_change = 1
+        level_change = 0
+        first_round = 1
+
+        init_json = json.dumps(env.reset(), ensure_ascii=False)
+        replay_file.write(init_json+'\n')
+        send_to_judger((init_json+'\n').encode("utf-8"), 0)
+        send_to_judger((init_json+'\n').encode("utf-8"), 1)
+
+        # 第一次接收ai信息，设定更长的time
+        for i in range(2) :
+            state += 1
+            if players[i].type == 1:
+                send_round_config(FIRST_MAX_AI_TIME, MAX_LENGTH)
+            elif players[1-i].type == 2:
+                send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
+
+            # 不发送东西
+            send_round_info(
+                state,
+                [players[i].id],
+                [],
+                [],
+            )
+
+            players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+            send_to_judger(f"player {i} send info\n".encode("utf-8"), 1-i)
+
         # 一局中包含三个state 1.接收吃豆人消息 2.接收幽灵消息 3.调用step
         while game_continue:
-            # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
-            if level_change == 1:
-                if env.get_level() >= 3 :
-                    game_continue = False
-                    
-                else :
-                    init_json = json.dumps(env.reset(), ensure_ascii=False)
-                    replay_file.write(init_json+'\n')
-                    send_to_judger(json.dumps(init_json, ensure_ascii=False).encode("utf-8"), 0)
-                    send_to_judger(json.dumps(init_json, ensure_ascii=False).encode("utf-8"), 1)
-                    level_change = 0
+            if first_round != 1 :
+                # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
+                if level_change == 1:
+                    if env.get_level() >= 3 :
+                        game_continue = False
+                        
+                    else :
+                        init_json = json.dumps(env.reset(), ensure_ascii=False)
+                        replay_file.write(init_json+'\n')
+                        send_to_judger((init_json+'\n').encode("utf-8"), 0)
+                        send_to_judger((init_json+'\n').encode("utf-8"), 1)
+                        level_change = 0
 
-            if not game_continue:
-                break
-            
-            # 接受吃豆人的消息和幽灵的消息
-            for i in range(2) :
-                state += 1
-                if players[i].type == 1:
-                    send_round_config(MAX_AI_TIME, MAX_LENGTH)
-                elif players[1-i].type == 2:
-                    send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
+                if not game_continue:
+                    break
+                
+                # 接受吃豆人的消息和幽灵的消息
+                for i in range(2) :
+                    state += 1
+                    if players[i].type == 1:
+                        send_round_config(MAX_AI_TIME, MAX_LENGTH)
+                    elif players[1-i].type == 2:
+                        send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
 
-                # 不发送东西
-                send_round_info(
-                    state,
-                    [players[i].id],
-                    [],
-                    [],
-                )
+                    # 不发送东西
+                    send_round_info(
+                        state,
+                        [players[i].id],
+                        [],
+                        [],
+                    )
 
-                players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
-                send_to_judger(f"player {i} send info".encode("utf-8"), 1-i)
+                    players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+                    send_to_judger(f"player {i} send info\n".encode("utf-8"), 1-i)
+            else :
+                first_round = 0
 
             # 调用step
             state += 1
@@ -328,10 +358,8 @@ if __name__ == "__main__":
                     state,
                     [],
                     [players[0].id,players[1].id],
-                    [info1,info2],
+                    [info1+'\n',info2+'\n'],
                 )
-                
-                
             else :
                 # 1号玩家是吃豆人
                 game_continue , info1 , info2 , level_change = interact(
@@ -341,7 +369,7 @@ if __name__ == "__main__":
                     state,
                     [],
                     [players[1].id,players[0].id],
-                    [info1,info2],
+                    [info1+'\n',info2+'\n'],
                 )
 
         end_state = json.dumps(
