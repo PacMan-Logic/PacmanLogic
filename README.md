@@ -34,11 +34,17 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
 若改变棋盘则发送初始化信息
 ```py
 {
-    "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()],
+    "ghosts_coord": [
+        self._ghosts[0].get_coord(),
+        self._ghosts[1].get_coord(),
+        self._ghosts[2].get_coord(),
+    ],
     "pacman_coord": self._pacman.get_coord(),
     "score": [self._pacman_score, self._ghosts_score],
     "level": self._level,
-    "board": return_board, # 二维数组，棋盘 
+    "board": return_board,
+    "events": [],
+    "beannumber": beannum # 豆子总数
 }
 ```
 
@@ -61,17 +67,20 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
 每局结束发给播放器的info
 ```py
 {
-    "ghosts_step_block": self._ghosts_step_block, # 幽灵走过路径
-    "ghosts_coord": [self._ghosts[0].get_coord(),self._ghosts[1].get_coord(),self._ghosts[2].get_coord()], # 幽灵坐标
-    "pacman_step_block": self._pacman_step_block, # 吃豆人路径
+    "round": self._round, # 当前回合的轮数
+    "level": self._level, # 当前回合数
+    "pacman_step_block": self._pacman_step_block, # 吃豆人走过的路径
     "pacman_coord": self._pacman.get_coord(), # 吃豆人坐标
     "pacman_skills": self._last_skill_status, # 吃豆人技能
-    # Note: 播放器需要根据是否有magnet属性确定每次移动的时候需要如何吸取豆子
-    "round": self._round, # 轮数
-    "score": [self._pacman_score, self._ghosts_score], # 吃豆人、幽灵分数
-    "level": self._level, # 关卡数
+    "ghosts_step_block": self._ghosts_step_block, # 幽灵走过的路径
+    "ghosts_coord": [
+        self._ghosts[0].get_coord(),
+        self._ghosts[1].get_coord(),
+        self._ghosts[2].get_coord(),
+    ], # 幽灵坐标
+    "score": [self._pacman_score, self._ghosts_score], # 吃豆人和幽灵的得分
+    "events": [i.value for i in self._event_list], # 事件
     "StopReason": None,
-    "event_list": List[int]
 }
 ```
 event_list中数与事件的对应如下：
@@ -83,4 +92,9 @@ class Event(enum.Enum):
     # 2 and 3 should not occur simutaneously
     FINISH_LEVEL= 2
     TIMEOUT = 3
+```
+
+# 更新core中的内容
+```
+git submodule update --remote core
 ```
