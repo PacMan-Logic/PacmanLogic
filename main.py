@@ -292,7 +292,7 @@ if __name__ == "__main__":
             state += 1
             if players[i].type == 1:
                 send_round_config(FIRST_MAX_AI_TIME, MAX_LENGTH)
-            elif players[1-i].type == 2:
+            elif players[i].type == 2:
                 send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
 
             # 不发送东西
@@ -329,7 +329,7 @@ if __name__ == "__main__":
                     state += 1
                     if players[i].type == 1:
                         send_round_config(MAX_AI_TIME, MAX_LENGTH)
-                    elif players[1-i].type == 2:
+                    elif players[i].type == 2:
                         send_round_config(MAX_PLAYER_TIME, MAX_LENGTH)
 
                     # 不发送东西
