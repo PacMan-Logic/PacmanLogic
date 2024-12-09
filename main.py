@@ -45,6 +45,8 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
         # 回放文件写入结束信息
         replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
 
+        send_watch_info(json.dumps(return_dict, ensure_ascii=False)+'\n')
+
         if player_type == 2:
             send_to_judger(
                 json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), playerid
@@ -109,6 +111,8 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
             # 回放文件写入结束信息
             replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
 
+            send_watch_info(json.dumps(return_dict, ensure_ascii=False)+'\n')
+
             if player_type == 2:
                 send_to_judger(
                     json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), playerid
@@ -159,6 +163,9 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
         return_dict = env.render()
         return_dict["StopReason"] = f"Error in executing actions from players, error: {error}"
         replay_file.write(json.dumps(return_dict, ensure_ascii=False) + "\n")
+
+        send_watch_info(json.dumps(return_dict, ensure_ascii=False)+'\n')
+
         if pacman.type == 2:
             send_to_judger(
                 json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), pacman.id
@@ -195,6 +202,7 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     # 更新游戏状态
     new_state = env.render()
     replay_file.write(json.dumps(new_state, ensure_ascii=False) + "\n")
+    send_watch_info(json.dumps(new_state, ensure_ascii=False)+'\n')
     # 返回新的状态信息
     game_continue = True
     info1 = "" # 返回给吃豆人的信息
@@ -248,6 +256,8 @@ if __name__ == "__main__":
             end_json = json.dumps(end_dict, ensure_ascii=False)
             replay_file.write(end_json + "\n")
 
+            send_watch_info(end_json+'\n')
+
             if players[0].type == 2:
                 send_to_judger(json.dumps(end_dict), 0)
 
@@ -282,6 +292,8 @@ if __name__ == "__main__":
 
         init_json = json.dumps(env.reset(), ensure_ascii=False)
         replay_file.write(init_json+'\n')
+
+        send_watch_info(init_json+'\n')
         send_to_judger((init_json+'\n').encode("utf-8"), 0)
         send_to_judger((init_json+'\n').encode("utf-8"), 1)
 
@@ -315,6 +327,7 @@ if __name__ == "__main__":
                     else :
                         init_json = json.dumps(env.reset(), ensure_ascii=False)
                         replay_file.write(init_json+'\n')
+                        send_watch_info(init_json+'\n')
                         send_to_judger((init_json+'\n').encode("utf-8"), 0)
                         send_to_judger((init_json+'\n').encode("utf-8"), 1)
                         level_change = 0
@@ -393,6 +406,8 @@ if __name__ == "__main__":
             send_to_judger(json.dumps(end_json, ensure_ascii=False).encode("utf-8"), 0)
         if players[1].type == 2:
             send_to_judger(json.dumps(end_json, ensure_ascii=False).encode("utf-8"), 1)
+        
+        send_watch_info(json.dumps(end_json, ensure_ascii=False)+'\n')
 
         replay_file.write(json.dumps(end_json, ensure_ascii=False) + "\n")
         send_game_end_info(json.dumps(end_info, ensure_ascii=False), end_state)
