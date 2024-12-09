@@ -6,7 +6,6 @@ import os
 from core.GymEnvironment import PacmanEnv
 from logic.utils import *
 from core.gamedata import *
-# from random_seed import set_seed
 
 ERROR_MAP = ["RE", "TLE", "OLE"]
 replay_file = None
@@ -22,11 +21,12 @@ class Player():
         self.type = type
         self.role = 0
 
-# FIXME: 在reset的时候随机幽灵和吃豆人的位置，这个处于创建环境之后、开始游戏之前
-
 def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type ):
     '''
-    获取ai或播放器用户的操作: 玩家1和玩家2的类型: 1 为 AI, 2 为网页播放器。
+    获取ai或播放器用户的操作
+
+    env: 游戏逻辑维护的唯一局面
+    玩家0和玩家1的类型: 1 为 AI, 2 为网页播放器。
     '''
     ai_info = receive_ai_info()
 
@@ -146,11 +146,9 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
 
 def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     '''
-    env: 游戏逻辑维护的唯一局面
-    pacman_type, ghost_type: 玩家1和玩家2的类型: 1 为 AI, 2 为网页播放器。
-    
     执行操作，输出要转发给对方的字符串
 
+    env: 游戏逻辑维护的唯一局面
     interact返回四个值: game_continue, info1, info2, level_change  info1和info2分别发给吃豆人和幽灵
     '''
     # 执行两个玩家的操作
@@ -287,7 +285,7 @@ if __name__ == "__main__":
         send_to_judger((init_json+'\n').encode("utf-8"), 0)
         send_to_judger((init_json+'\n').encode("utf-8"), 1)
 
-        # 第一次接收ai信息，设定更长的time
+        # 第一次接收ai信息，设定更长的time，为sdk的初始化预留时间
         for i in range(2) :
             state += 1
             if players[i].type == 1:
@@ -377,8 +375,6 @@ if __name__ == "__main__":
         )
         pacmanscore = env.get_pacman_score()
         ghostscore = env.get_ghosts_score()
-        # print("score_pacman: {}".format(pacmanscore)) 
-        # print("score_ghost: {}".format(ghostscore)) 
 
         end_json = env.render()
         end_json["StopReason"] = f"time is up"
