@@ -64,22 +64,6 @@ action 为 0/1/2/3/4 表示 不动/上/左/下/右
 每局结束发给播放器的info
 ```py
 {
-    "round": self._round, 
-    "level": self._level, 
-    "pacman_step_block": self._pacman_step_block, 
-    "pacman_coord": self._pacman.get_coord(), 
-    "pacman_skills": self._last_skill_status, 
-    "ghosts_step_block": self._ghosts_step_block, 
-    "ghosts_coord": [
-        self._ghosts[0].get_coord(),
-        self._ghosts[1].get_coord(),
-        self._ghosts[2].get_coord(),
-    ], 
-    "score": [self._pacman_score, self._ghosts_score], 
-    "events": [i.value for i in self._event_list], 
-    "StopReason": None,
-}
-{
     "round": self._round, # 当前回合的轮数
     "level": self._level, # 当前回合数
     "pacman_step_block": self._pacman_step_block, # 吃豆人走过的路径
