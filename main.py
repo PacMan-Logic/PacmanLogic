@@ -157,7 +157,11 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     '''
     # 执行两个玩家的操作
     try:
-        level_change , eat_all_beans = env.step(pacman.action[0], ghosts.action)
+        info , pacman_reward , ghosts_reward , level_change , eat_all_beans = env.step(pacman.action[0], ghosts.action)
+        # debug
+        replay_file.write("pacman_reward"+str(pacman_reward) + "\n")
+        replay_file.write("ghosts_reward"+str(ghosts_reward) + "\n")
+
     except:
         error = traceback.format_exc()
         return_dict = env.render()
