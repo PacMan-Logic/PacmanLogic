@@ -296,7 +296,14 @@ if __name__ == "__main__":
         eat_all_beans = False
         first_round = True
 
-        init_json = json.dumps(env.reset(), ensure_ascii=False)
+        reset_info = env.reset().copy()
+        reset_info["pacman_skill_status"] = reset_info["pacman_skill_status"].tolist()
+        reset_info["board"] = reset_info["board"].tolist()
+        reset_info["pacman_coord"] = reset_info["pacman_coord"].tolist()
+        reset_info["ghosts_coord"] = [coord.tolist() for coord in reset_info["ghosts_coord"]]
+        reset_info["portal_coord"] = reset_info["portal_coord"].tolist()
+        
+        init_json = json.dumps(reset_info, ensure_ascii=False)
         replay_file.write(init_json+'\n')
 
         send_watch_info(init_json+'\n')
@@ -331,7 +338,14 @@ if __name__ == "__main__":
                         game_continue = False
                         
                     else :
-                        init_json = json.dumps(env.reset(), ensure_ascii=False)
+                        reset_info = env.reset().copy()
+                        reset_info["pacman_skill_status"] = reset_info["pacman_skill_status"].tolist()
+                        reset_info["board"] = reset_info["board"].tolist()
+                        reset_info["pacman_coord"] = reset_info["pacman_coord"].tolist()
+                        reset_info["ghosts_coord"] = [coord.tolist() for coord in reset_info["ghosts_coord"]]
+                        reset_info["portal_coord"] = reset_info["portal_coord"].tolist()
+                        
+                        init_json = json.dumps(reset_info, ensure_ascii=False)
                         replay_file.write(init_json+'\n')
                         send_watch_info(init_json+'\n')
                         send_to_judger((init_json+'\n').encode("utf-8"), 0)
