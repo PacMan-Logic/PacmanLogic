@@ -12,7 +12,7 @@
 # 通信
 ## 用户->逻辑：json转化为的字符串
 
-### 作为吃豆人: 
+### 作为卷王: 
 ```json
 {
     "role": 0,
@@ -39,11 +39,10 @@ action 为 0/1/2/3/4 分别表示 不动/上/左/下/右
 ```py
 {
     "ghosts_coord": [ghost.get_coord() for ghost in self._ghosts], # 幽灵坐标
-    "pacman_coord": self._pacman.get_coord(), # 吃豆人坐标
+    "pacman_coord": self._pacman.get_coord(), # 卷王坐标
     "score": [self._pacman_score, self._ghosts_score], # 双方得分
     "level": self._level, # 关卡号
     "board": self._board.tolist(), # 棋盘，为一个二维数组
-    "events": [],
     "beannumber": beannum, # 豆子总数
     "portal_coord": self._portal_coord, # 传送门位置
 }
@@ -60,7 +59,7 @@ action 为 0/1/2/3/4 分别表示 不动/上/左/下/右
 每局结束发给ai的信息为操作信息
 ```py
 {
-    "pacman_action" : pacman.action[0], # 一个数，为吃豆人的操作
+    "pacman_action" : pacman.action[0], # 一个数，为卷王的操作
     "ghosts_action" : ghosts.action # 一个含三个元素的数组，为三个幽灵的操作
 }
 ```
@@ -70,12 +69,12 @@ action 为 0/1/2/3/4 分别表示 不动/上/左/下/右
 {
     "round": self._round, # 当前回合的轮数
     "level": self._level, # 当前回合数
-    "pacman_step_block": self._pacman_step_block, # 吃豆人走过的路径
-    "pacman_coord": self._pacman.get_coord(), # 吃豆人坐标
-    "pacman_skills": self._last_skill_status, # 吃豆人技能
+    "pacman_step_block": self._pacman_step_block, # 卷王走过的路径
+    "pacman_coord": self._pacman.get_coord(), # 卷王坐标
+    "pacman_skills": self._last_skill_status, # 卷王技能
     "ghosts_step_block": self._ghosts_step_block, # 幽灵走过的路径
     "ghosts_coord": [ghost.get_coord() for ghost in self._ghosts], # 幽灵坐标
-    "score": [self._pacman_score, self._ghosts_score], # 吃豆人和幽灵的得分
+    "score": [self._pacman_score, self._ghosts_score], # 卷王和幽灵的得分
     "events": [i.value for i in self._event_list], # 事件
     "portal_available": self._portal_available, # 传送门是否已经开启
     "StopReason": None,
