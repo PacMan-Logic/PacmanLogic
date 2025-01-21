@@ -87,26 +87,25 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
 
             if role == Role.PACMAN.value:
                 # 表明玩家是吃豆人
-                # 若字符串格式有误则默认不动
                 if len(action) != 1 or action[0] < 0 or action[0] >= 5 : 
-                    action = [0]
+                    raise ValueError("Invalid action for PACMAN.")
             else:
                 # 表明玩家是幽灵
                 if len(action) != 3 :
-                    action = [0,0,0]
+                    raise ValueError("Invalid action count for ghost.")
                 else :
                     if action[0] < 0 or action[0] >= 5 :
-                        action[0] = 0
+                        raise ValueError("Invalid action for ghost at index 0.")
                     if action[1] < 0 or action[1] >= 5 :
-                        action[1] = 0
+                        raise ValueError("Invalid action for ghost at index 1.")
                     if action[2] < 0 or action[2] >= 5 :
-                        action[2] = 0
+                        raise ValueError("Invalid action for ghost at index 2.")
             return role , action
         except:
             error = traceback.format_exc()
             return_dict = env.render()
             return_dict["StopReason"] = (
-                f"Invalid Operation {ai_info['content']} from player {playerid}, judger returned error {error}."
+                f"Invalid Operation: {error}."
             )
             # 回放文件写入结束信息
             replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
