@@ -368,7 +368,12 @@ if __name__ == "__main__":
                         [],
                     )
 
-                    players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+                    role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+                    if role != players[i].role:
+                        if players[i].role == Role.PACMAN.value:
+                            players[i].action = [0]
+                        else:
+                            players[i].action = [0,0,0]
                     send_to_judger(f"player {i} send info\n".encode("utf-8"), 1-i)
             else :
                 first_round = False
