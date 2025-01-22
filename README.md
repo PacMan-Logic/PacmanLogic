@@ -35,16 +35,20 @@ action 为 0/1/2/3/4 分别表示 不动/上/左/下/右
 
 第0回合（state）发送座位信息：向0号玩家发送字符串```"0"```，向1号玩家发送字符串```"1"```
 
-每轮（round）开始时，若改变棋盘则向0号玩家和1号玩家发送初始化信息：
+每轮（round）开始时，若棋盘改变（进入到新的回合）则向0号玩家和1号玩家发送初始化信息：
 ```py
 {
-    "ghosts_coord": [ghost.get_coord() for ghost in self._ghosts], # 幽灵坐标
+    "level": self._level,
+    "round": self._round,
+    "board_size": self._size,
+    "board": self._board,
+    "pacman_skill_status": np.array(self._pacman.get_skills_status()),
     "pacman_coord": self._pacman.get_coord(), # 卷王坐标
-    "score": [self._pacman_score, self._ghosts_score], # 双方得分
-    "level": self._level, # 关卡号
-    "board": self._board.tolist(), # 棋盘，为一个二维数组
-    "beannumber": beannum, # 豆子总数
-    "portal_coord": self._portal_coord, # 传送门位置
+    "ghosts_coord": [ghost.get_coord() for ghost in self._ghosts], # 幽灵坐标
+    "score": [self._pacman_score, self._ghosts_score],
+    "beannumber": self._beannumber,
+    "portal_available": self._portal_available,
+    "portal_coord": self._portal_coord,
 }
 ```
 
