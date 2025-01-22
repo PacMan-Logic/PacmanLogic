@@ -105,7 +105,7 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
             error = traceback.format_exc()
             return_dict = env.render()
             return_dict["StopReason"] = (
-                f"Invalid Operation: {error}."
+                f"{error}"
             )
             # 回放文件写入结束信息
             replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
@@ -369,10 +369,50 @@ if __name__ == "__main__":
 
                     role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
                     if role != players[i].role:
-                        if players[i].role == Role.PACMAN.value:
-                            players[i].action = [0]
+                        # 角色信息错误
+                        return_dict = env.render()
+                        return_dict["StopReason"] = (
+                            f"Role error."
+                        )
+                        # 回放文件写入结束信息
+                        replay_file.write(json.dumps(return_dict, ensure_ascii=False)+"\n")
+
+                        send_watch_info(json.dumps(return_dict, ensure_ascii=False)+'\n')
+
+                        if players[i].type == Type.PLAYER.value:
+                            send_to_judger(
+                                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), i
+                            )
+
+                        if players[1-i].type == Type.PLAYER.value:
+                            send_to_judger(
+                                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"),
+                                1 - i,
+                            )
+
+                        end_state = ["OK", "OK"]
+                        end_state[i] = "IA"
+
+                        pacmanscore = env.get_pacman_score()
+                        ghostscore = env.get_ghosts_score()
+                        end_info = {}
+                        if players[0].role == Role.PACMAN.value:
+                            end_info = {
+                                "0": pacmanscore,
+                                "1": ghostscore,
+                            }
                         else:
-                            players[i].action = [0,0,0]
+                            end_info = {
+                                "0": ghostscore,
+                                "1": pacmanscore,
+                            }
+
+                        send_game_end_info(
+                            json.dumps(end_info, ensure_ascii=False), json.dumps(end_state)
+                        )
+                        replay_file.close()
+                        time.sleep(0.5)
+                        exit(0)
                     send_to_judger(f"player {i} send info\n".encode("utf-8"), 1-i)
             else :
                 first_round = False
