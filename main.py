@@ -325,6 +325,7 @@ if __name__ == "__main__":
             players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
             send_to_judger(f"player {i} send info\n".encode("utf-8"), 1-i)
         
+        # 两玩家同为卷王或同为幽灵 直接IA
         if players[0].role == players[1].role:
             return_dict = env.render()
             return_dict["StopReason"] = f"Same Role"
