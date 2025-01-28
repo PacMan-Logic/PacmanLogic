@@ -324,6 +324,40 @@ if __name__ == "__main__":
 
             players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
             send_to_judger(f"player {i} send info\n".encode("utf-8"), 1-i)
+        
+        if players[0].role == players[1].role:
+            return_dict = env.render()
+            return_dict["StopReason"] = f"Same Role"
+            replay_file.write(json.dumps(return_dict, ensure_ascii=False) + "\n")
+
+            send_watch_info(json.dumps(return_dict, ensure_ascii=False)+'\n')
+
+            if players[0].type == Type.PLAYER.value:
+                send_to_judger(
+                    json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), players[0].id
+                )
+
+            if players[1].type == Type.PLAYER.value:
+                send_to_judger(
+                    json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), players[1].id
+                )
+
+            end_state = ["IA", "IA"]
+
+            pacmanscore = env.get_pacman_score()
+            ghostscore = env.get_ghosts_score()
+            end_info = {}
+            end_info = {
+                "0": pacmanscore,
+                "1": ghostscore,
+            }
+
+            send_game_end_info(
+                json.dumps(end_info, ensure_ascii=False), json.dumps(end_state)
+            )
+            replay_file.close()
+            time.sleep(0.5)
+            exit(0)
 
         # 一局中包含三个state 1.接收吃豆人消息 2.接收幽灵消息 3.调用step
         while game_continue:
