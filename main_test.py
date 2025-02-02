@@ -153,7 +153,7 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     '''
     # 执行两个玩家的操作
     try:
-        board , score , level_change = env.step(pacman.action[0], ghosts.action)
+        info , pacman_reward , ghosts_reward , level_change , eat_all_beans = env.step(pacman.action[0], ghosts.action)
     except:
         error = traceback.format_exc()
         return_dict = env.render()
@@ -215,7 +215,7 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
     else:
         game_continue = False
 
-    return game_continue , info1 , info2 , level_change
+    return game_continue , info1 , info2 , level_change , eat_all_beans
 
 ai_info1 = {
     "player": 0,
@@ -296,7 +296,14 @@ if __name__ == "__main__":
         while game_continue:
             # 考察是否需要重新渲染，如果level发生改变，重置环境+获取初始化信息
             if level_change == 1:
-                init_json = json.dumps(env.reset(), ensure_ascii=False)
+                reset_info = env.reset().copy()
+                reset_info["pacman_skill_status"] = reset_info["pacman_skill_status"].tolist()
+                reset_info["board"] = reset_info["board"].tolist()
+                reset_info["pacman_coord"] = reset_info["pacman_coord"].tolist()
+                reset_info["ghosts_coord"] = [coord.tolist() for coord in reset_info["ghosts_coord"]]
+                reset_info["portal_coord"] = reset_info["portal_coord"].tolist()
+                
+                init_json = json.dumps(reset_info, ensure_ascii=False)
                 env.render("local")
                 replay_file.write(init_json+'\n')
 
@@ -341,7 +348,7 @@ if __name__ == "__main__":
             # send_round_config(MAX_AI_TIME, MAX_LENGTH)
             if players[0].role == 0 :
                 # 0号玩家是吃豆人
-                game_continue , info1 , info2 , level_change = interact(
+                game_continue , info1 , info2 , level_change , eat_all_beans = interact(
                     env, players[0] , players[1]
                 )
                 # send_round_info(
@@ -352,7 +359,7 @@ if __name__ == "__main__":
                 # )
             else :
                 # 1号玩家是吃豆人
-                game_continue , info1 , info2 , level_change = interact(
+                game_continue , info1 , info2 , level_change , eat_all_beans = interact(
                     env, players[1] , players[0]
                 )
                 # send_round_info(
