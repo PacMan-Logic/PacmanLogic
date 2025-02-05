@@ -76,8 +76,8 @@ def get_ai_info( env: PacmanEnv , player: Player , another_player: Player ):
             }
         else:
             end_info = {
-                "0": pacmanscore + end_error_score[0],
-                "1": ghostscore + end_error_score[1],
+                "0": ghostscore + end_error_score[0],
+                "1": pacmanscore + end_error_score[1],
             }
         send_game_end_info(json.dumps(end_info), json.dumps(end_list))
         replay_file.close()
@@ -144,8 +144,8 @@ def get_ai_info( env: PacmanEnv , player: Player , another_player: Player ):
                 }
             else:
                 end_info = {
-                    "0": pacmanscore + end_error_score[0],
-                    "1": ghostscore + end_error_score[1],
+                    "0": ghostscore + end_error_score[0],
+                    "1": pacmanscore + end_error_score[1],
                 }
 
             send_game_end_info(
@@ -199,8 +199,8 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
             }
         else:
             end_info = {
-                "0": pacmanscore + end_error_score[0],
-                "1": ghostscore + end_error_score[1],
+                "0": ghostscore + end_error_score[0],
+                "1": pacmanscore + end_error_score[1],
             }
 
         send_game_end_info(
