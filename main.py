@@ -282,8 +282,12 @@ if __name__ == "__main__":
             end_error_score = [0, 0]
             if players[0].type == Type.ABNORMAL.value:
                 end_error_score[0] = -ERROR_SCORE
+            else:
+                end_error_score[0] = NORMAL_SCORE
             if players[1].type == Type.ABNORMAL.value:
                 end_error_score[1] = -ERROR_SCORE
+            else:
+                end_error_score[1] = NORMAL_SCORE
             end_info = {
                 "0": end_error_score[0],
                 "1": end_error_score[1],
