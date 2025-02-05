@@ -21,7 +21,7 @@ class Player():
         self.type = type
         self.role = Role.PACMAN.value
 
-def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type ):
+def get_ai_info( env: PacmanEnv , player: Player , another_player: Player ):
     '''
     获取ai或播放器用户的操作
 
@@ -30,7 +30,7 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
     '''
     ai_info = receive_ai_info()
 
-    while ai_info["player"] != -1 and ai_info["player"] != playerid:
+    while ai_info["player"] != -1 and ai_info["player"] != player.id:
         ai_info = receive_ai_info()
     # 判定交互对象状态
     # 如果交互对象异常则退出
@@ -47,32 +47,37 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
 
         send_watch_info(json.dumps(return_dict, ensure_ascii=False)+'\n')
 
-        if player_type == Type.PLAYER.value:
+        if player.type == Type.PLAYER.value:
             send_to_judger(
-                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), playerid
+                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), player.id
             )
 
-        if another_player_type == Type.PLAYER.value:
+        if another_player.type == Type.PLAYER.value:
             send_to_judger(
-                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), 1 - playerid
+                json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), another_player.id
             )
 
         end_list = ["OK", "OK"]
-        end_list[json.loads(ai_info["content"])["player"]] = ERROR_MAP[
+        error_id = json.loads(ai_info["content"])["player"]
+        end_list[error_id] = ERROR_MAP[
             json.loads(ai_info["content"])["error"]
         ]
+        end_error_score = [0, 0]
+        end_error_score[error_id] = -ERROR_SCORE
+        end_error_score[1-error_id] = NORMAL_SCORE
+
         pacmanscore = env.get_pacman_score()
         ghostscore = env.get_ghosts_score()
         end_info = {}
-        if players[0].role == 0:
+        if players[0].role == Role.PACMAN.value:
             end_info = {
-                "0": pacmanscore,
-                "1": ghostscore,
+                "0": pacmanscore + end_error_score[0],
+                "1": ghostscore + end_error_score[1],
             }
         else:
             end_info = {
-                "0": ghostscore,
-                "1": pacmanscore,
+                "0": pacmanscore + end_error_score[0],
+                "1": ghostscore + end_error_score[1],
             }
         send_game_end_info(json.dumps(end_info), json.dumps(end_list))
         replay_file.close()
@@ -112,32 +117,35 @@ def get_ai_info( env: PacmanEnv , playerid , player_type , another_player_type )
 
             send_watch_info(json.dumps(return_dict, ensure_ascii=False)+'\n')
 
-            if player_type == Type.PLAYER.value:
+            if player.type == Type.PLAYER.value:
                 send_to_judger(
-                    json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), playerid
+                    json.dumps(return_dict, ensure_ascii=False).encode("utf-8"), player.id
                 )
 
-            if another_player_type == Type.PLAYER.value:
+            if another_player.type == Type.PLAYER.value:
                 send_to_judger(
                     json.dumps(return_dict, ensure_ascii=False).encode("utf-8"),
-                    1 - playerid,
+                    another_player.id,
                 )
 
             end_state = ["OK", "OK"]
-            end_state[playerid] = "IA"
+            end_state[player.id] = "IA"
+            end_error_score = [0,0]
+            end_error_score[player.id] = -ERROR_SCORE
+            end_error_score[1-player.id] = NORMAL_SCORE
 
             pacmanscore = env.get_pacman_score()
             ghostscore = env.get_ghosts_score()
             end_info = {}
             if players[0].role == Role.PACMAN.value:
                 end_info = {
-                    "0": pacmanscore,
-                    "1": ghostscore,
+                    "0": pacmanscore + end_error_score[0],
+                    "1": ghostscore + end_error_score[1],
                 }
             else:
                 end_info = {
-                    "0": ghostscore,
-                    "1": pacmanscore,
+                    "0": pacmanscore + end_error_score[0],
+                    "1": ghostscore + end_error_score[1],
                 }
 
             send_game_end_info(
@@ -177,19 +185,22 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
             )
 
         end_state = ["IA", "IA"]
+        end_error_score = [0, 0]
+        end_error_score[0] = -ERROR_SCORE
+        end_error_score[1] = -ERROR_SCORE
 
         pacmanscore = env.get_pacman_score()
         ghostscore = env.get_ghosts_score()
         end_info = {}
         if pacman.id == 0:
             end_info = {
-                "0": pacmanscore,
-                "1": ghostscore,
+                "0": pacmanscore + end_error_score[0],
+                "1": ghostscore + end_error_score[1],
             }
         else:
             end_info = {
-                "0": ghostscore,
-                "1": pacmanscore,
+                "0": pacmanscore + end_error_score[0],
+                "1": ghostscore + end_error_score[1],
             }
 
         send_game_end_info(
@@ -268,10 +279,14 @@ if __name__ == "__main__":
                 ["OK" if players[0].type else "RE",
                     "OK" if players[1].type else "RE"]
             )
-            # 若初始化异常则都为0分
+            end_error_score = [0, 0]
+            if players[0].type == Type.ABNORMAL.value:
+                end_error_score[0] = -ERROR_SCORE
+            if players[1].type == Type.ABNORMAL.value:
+                end_error_score[1] = -ERROR_SCORE
             end_info = {
-                "0": 0,
-                "1": 0,
+                "0": end_error_score[0],
+                "1": end_error_score[1],
             }
             send_game_end_info(json.dumps(end_info), end_state)
             replay_file.close()
@@ -322,7 +337,7 @@ if __name__ == "__main__":
                 [],
             )
 
-            players[i].role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+            players[i].role , players[i].action = get_ai_info(env,players[i],players[1-i])
             send_to_judger(f"player {i} send info\n".encode("utf-8"), 1-i)
         
         # 两玩家同为卷王或同为幽灵 直接IA
@@ -344,13 +359,14 @@ if __name__ == "__main__":
                 )
 
             end_state = ["IA", "IA"]
+            end_error_score = [0, 0]
+            end_error_score[0] = -ERROR_SCORE
+            end_error_score[1] = -ERROR_SCORE
 
-            pacmanscore = env.get_pacman_score()
-            ghostscore = env.get_ghosts_score()
             end_info = {}
             end_info = {
-                "0": pacmanscore,
-                "1": ghostscore,
+                "0": end_error_score[0],
+                "1": end_error_score[1],
             }
 
             send_game_end_info(
@@ -402,7 +418,7 @@ if __name__ == "__main__":
                         [],
                     )
 
-                    role , players[i].action = get_ai_info(env,players[i].id,players[i].type,players[1-i].type)
+                    role , players[i].action = get_ai_info(env,players[i],players[1-i])
                     if role != players[i].role:
                         # 角色信息错误
                         return_dict = env.render()
@@ -427,19 +443,22 @@ if __name__ == "__main__":
 
                         end_state = ["OK", "OK"]
                         end_state[i] = "IA"
+                        end_error_score = [0, 0]
+                        end_error_score[i] = -ERROR_SCORE
+                        end_error_score[1 - i] = NORMAL_SCORE
 
                         pacmanscore = env.get_pacman_score()
                         ghostscore = env.get_ghosts_score()
                         end_info = {}
                         if players[0].role == Role.PACMAN.value:
                             end_info = {
-                                "0": pacmanscore,
-                                "1": ghostscore,
+                                "0": pacmanscore + end_error_score[0],
+                                "1": ghostscore + end_error_score[1],
                             }
                         else:
                             end_info = {
-                                "0": ghostscore,
-                                "1": pacmanscore,
+                                "0": ghostscore + end_error_score[0],
+                                "1": pacmanscore + end_error_score[1],
                             }
 
                         send_game_end_info(
