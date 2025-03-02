@@ -206,15 +206,24 @@ def interact( env: PacmanEnv, pacman: Player , ghosts: Player ):
 
     # 返回新的状态信息
     game_continue = True
-    info1 = None
-    info2 = None
-    if new_state['level'] != MAX_LEVEL or env.check_round_end() == False:
-        # 游戏没有结束
-        info1 = json.dumps(new_state, ensure_ascii=False) # 返回给吃豆人的信息
-        info2 = json.dumps(new_state, ensure_ascii=False) # 返回给幽灵的信息
-    else:
-        game_continue = False
-
+    info1 = "" # 返回给吃豆人的信息
+    info2 = "" # 返回给幽灵的信息
+    if pacman.type == Type.AI.value:
+        info_to_ai = {
+            "pacman_action" : pacman.action[0],
+            "ghosts_action" : ghosts.action
+        }
+        info1 = json.dumps(info_to_ai, ensure_ascii=False)
+    elif pacman.type == Type.PLAYER.value:
+        info1 = json.dumps(new_state, ensure_ascii=False) 
+    if ghosts.type == Type.AI.value:
+        info_to_ai = {
+            "pacman_action" : pacman.action[0],
+            "ghosts_action" : ghosts.action
+        }
+        info2 = json.dumps(info_to_ai, ensure_ascii=False)
+    elif ghosts.type == Type.PLAYER.value:
+        info2 = json.dumps(new_state, ensure_ascii=False)
     return game_continue , info1 , info2 , level_change , eat_all_beans
 
 ai_info1 = {
